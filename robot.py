@@ -1,0 +1,20 @@
+
+
+class MyRobot():
+    def __init__(self):
+        pass
+
+    def autonomousInit(self):
+        pass
+
+    def autonomousPeriodic(self):
+        pass
+
+    def teleopInit(self):
+        pass
+
+    def teleopPeriodic(self):
+        pass
+
+    def robotPeriodic(self):
+        pass
