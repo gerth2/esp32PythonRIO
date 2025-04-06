@@ -9,7 +9,7 @@ if ser.is_open:
     try:
         while True:
             # Read a line from the serial port
-            line = ser.readline().decode('utf-8').rstrip()
+            line = ser.readline().decode('utf-8', 'replace').rstrip()
             # Print the line to the terminal
             print(line)
     except KeyboardInterrupt:

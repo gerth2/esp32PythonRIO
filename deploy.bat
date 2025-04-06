@@ -4,4 +4,3 @@ for %%f in (*.py) do (
 )
 
 mpremote soft-reset
-python utils/serialMonitor.py

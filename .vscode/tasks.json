@@ -1,0 +1,70 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PyMiniBot: Deploy",
+            "type": "shell",
+            "windows": {
+                "command": "./deploy.bat"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true,
+                "focus": true,
+                "showReuseMessage": false,
+            },
+            "problemMatcher": [],
+            "icon": {
+                "id": "cloud-upload"
+            },
+            
+        },
+        {
+            "label": "delay",
+            "type": "shell",
+            "command": "sleep 10",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "clear": true,
+                "focus": false,
+                "showReuseMessage": false
+            },
+            "problemMatcher": [],
+            "group": "none",
+            "hide": true
+        },
+        {
+            "label": "PyMiniBot: View Netconsole",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/utils"
+            },
+            "windows": {
+                "command": "py -3 -m serialMonitor.py"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true,
+                "showReuseMessage": false,
+                "revealProblems": "onProblem"
+            },
+            "problemMatcher": [],
+            "icon": {
+                "id": "check-all"
+            }
+        }
+    ]
+}

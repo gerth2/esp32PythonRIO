@@ -1,5 +1,8 @@
-import network, socket
-import struct
+import network, socket, time
+import struct, io
+from TCPServerManager import TCPServerManager
+from ESP32Stats import ESP32SystemStats
+
 
 DS_MODE_AUTO = 2
 DS_MODE_TELEOP = 0
@@ -142,8 +145,13 @@ class ToDsUDPPacket:
         data = struct.pack("<I", free_space_bytes)
         self.add_tag(tag_id, data)
 
-    def add_cpu_info(self, num_cpus: float, critical: float, above_normal: float, normal: float, low: float):
+    def add_cpu_info(self, load_pct: float):
         tag_id = 0x05
+        num_cpus = 1.0
+        critical = load_pct
+        above_normal = 0.0
+        normal = 0.0
+        low = 100.0 - load_pct
         data = struct.pack("<fffff", num_cpus, critical, above_normal, normal, low)
         self.add_tag(tag_id, data)
 
@@ -200,8 +208,7 @@ class ToDsUDPPacket:
         s += f"Tags:{len(self.tags)}"
 
         return s
-
-
+    
     def to_bytes(self) -> bytes:
         # Battery as two bytes: XXYY, Voltage = XX + YY / 256
         voltage_whole = int(self.battery_voltage)
@@ -219,16 +226,78 @@ class ToDsUDPPacket:
 
         return packet
 
+class ToDSTCPPacket:
+    def __init__(self):
+        self.size = 0  # Will be calculated later
+        self.id = 0  # Placeholder for ID (to be set based on the tag)
+        self.tags = []
+
+    def add_disable_faults(self, comms, v12):
+        # Disable Faults tag: comms (2 bytes), v12 (2 bytes)
+        self.tags.append({
+            'id': 0x04,  # Disable Faults tag ID
+            'data': struct.pack('!HH', comms, v12)
+        })
+
+    def add_rail_faults(self, v6, v5, v3_3):
+        # Rail Faults tag: v6, v5, v3.3 (all 2 bytes each)
+        self.tags.append({
+            'id': 0x05,  # Rail Faults tag ID
+            'data': struct.pack('!HHH', v6, v5, v3_3)
+        })
+
+    def add_version_info(self, device_type, can_id, name, version):
+        # Version Info tag
+        self.tags.append({
+            'id': 0x0A,  # Version Info tag ID
+            'data': struct.pack('!B', device_type) + bytes([0x00,0x00]) + struct.pack('!B', can_id) +
+                   struct.pack('!H', len(name)) + name.encode('utf-8') +
+                   struct.pack('!H', len(version)) + version.encode('utf-8')
+        })
+
+    def add_standard_output(self, timestamp, seq_num, message):
+        # Standard Output tag: timestamp (4 bytes), seq_num (2 bytes), message (variable length)
+        self.tags.append({
+            'id': 0x0C,  # Standard Output tag ID
+            'data': struct.pack('!f', timestamp) + struct.pack('!H', seq_num) + struct.pack('!H', len(message)) + message.encode('utf-8')
+        })
+
+    def to_bytes(self):
+        """Convert the packet to bytes, including Size and ID fields."""
+        packet_data = io.BytesIO()
+
+        for tag in self.tags:
+            tag_id = tag['id']
+            tag_data = tag['data']
+            tag_size = len(tag_data)
+
+            # Add Size (2 bytes, including ID)
+            size = 3 + tag_size  # 1 byte for ID + size of data
+            packet_data.write(struct.pack('!H', size))
+            packet_data.write(struct.pack('!B', tag_id))
+            packet_data.write(tag_data)
+
+        return packet_data.getvalue()
+
+
+
+
 
 class DsInterface():
     def __init__(self):
-        self._init_WiFi()
-        self._setupUDPRxSocket()
         self.seqNum = 0
         self._modeCmd = DS_MODE_TELEOP
         self._enabledCmd = False
         self._codeRunning = False
         self._dsAddr = None
+        self._txUDPSocket = None
+        self._rxUDPSocket = None
+        self._tcpMgr = None
+        self._stats = ESP32SystemStats()
+        self._stdoutSeqNum = 0
+
+        self._init_WiFi()
+        self._setupUDPRxSocket()
 
     def periodic(self):
         self._readPacket()
@@ -246,13 +315,15 @@ class DsInterface():
         """
         https://frcture.readthedocs.io/en/latest/driverstation/ds_to_rio.html
         """
-        data, addr = self.rxUDPSocket.recvfrom(512)
+
+        # UDP Data First
+        data, addr = self._rxUDPSocket.recvfrom(512)
 
         if addr != self._dsAddr:
             self._dsAddr = addr
             print("New DS Connected:", addr)
             self._setupUDPTxSocket()
-            #self._setupTCPSocket()
+            self._setupTCPSocket()
 
         if data:
             # Process the received packet as needed
@@ -268,15 +339,37 @@ class DsInterface():
             # Respond with latest data
             self._sendPeriodicPacket(packet.seqNum)
 
+        # Now TCP Data
+        if(self._tcpMgr is not None):
+            self._tcpMgr.update()
+
+            if self._tcpMgr.is_connected():
+                data = self._tcpMgr.recv()
+                if data:
+                    #print("Got data:", data)
+                    #self._tcpMgr.send(b"ack")
+                    dataPkt = ToDSTCPPacket()
+                    dataPkt.add_disable_faults(0, 0)
+                    dataPkt.add_rail_faults(0, 0, 0)
+                    dataPkt.add_version_info(0, 0, "robot", "1.0")
+                    dataPkt.add_standard_output(time.ticks_ms()/1000.0, self._stdoutSeqNum, "Hello from ESP32")
+                    self._stdoutSeqNum += 1
+                    self._tcpMgr.send(dataPkt.to_bytes())
+
     def _sendPeriodicPacket(self, seqNum):
         """
         https://frcture.readthedocs.io/en/latest/driverstation/rio_to_ds.html
         """
         packet = ToDsUDPPacket(seqNum, 0x01, 0x00, 0x00, 12.0, False)
+
+        packet.add_cpu_info(100.0)
+        packet.add_ram_info(1024, self._stats.get_free_heap())
+        packet.add_disk_info(self._stats.get_free_program_space())
+        
         packet.set_status(False, False, not self._codeRunning, self._enabledCmd, self._modeCmd)
         packet.set_trace(self._codeRunning, True, self._modeCmd==DS_MODE_TEST, self._modeCmd==DS_MODE_AUTO, self._modeCmd==DS_MODE_TELEOP, not self._enabledCmd)
         #print(str(packet))
-        self.txUDPSocket.write(packet.to_bytes())
+        self._txUDPSocket.write(packet.to_bytes())
         #print("===========")
     
     def _init_WiFi(self):
@@ -288,14 +381,13 @@ class DsInterface():
         self.ap.active(True)                       # activate the interface
 
     def _setupUDPTxSocket(self):
-        self.txUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.txUDPSocket.connect((self._dsAddr[0], 1150)) # TODO - hardcoded ds address? blech
-        self.txUDPSocket.setblocking(True)
+        self._txUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._txUDPSocket.connect((self._dsAddr[0], 1150)) # TODO - hardcoded ds address? blech
+        self._txUDPSocket.setblocking(False)
 
     def _setupUDPRxSocket(self):
-        self.rxUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.rxUDPSocket.bind(("0.0.0.0", 1110))
+        self._rxUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._rxUDPSocket.bind(("0.0.0.0", 1110))
 
     def _setupTCPSocket(self):
-        self.tcpSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.tcpSocket.connect((self._dsAddr[0], 1740))    # TCP connection
+        self._tcpMgr = TCPServerManager(1740)

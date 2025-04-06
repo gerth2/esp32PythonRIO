@@ -1,6 +1,12 @@
 # Why
 
+. "Mom Can we have XRP?"
+. "No, we have XRP at home."
+. at home...
+
 Economical robot platform that emulates the "look and feel" of frc programming as best as possible.
+
+And cuz Chris just wanted to try it.
 
 # TODO
 
