@@ -1,6 +1,7 @@
+from TimedRobot import TimedRobot
 
 
-class MyRobot():
+class MyRobot(TimedRobot):
     def __init__(self):
         pass
 
@@ -8,13 +9,13 @@ class MyRobot():
         pass
 
     def autonomousPeriodic(self):
-        pass
+        print("My Auto!")
 
     def teleopInit(self):
         pass
 
     def teleopPeriodic(self):
-        pass
+        print("My Teleop!")
 
     def robotPeriodic(self):
         pass

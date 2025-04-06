@@ -1,19 +1,31 @@
-import machine, sys, time
+from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, TR_MODE_TEST, MainStateMachine
+import sys, time
 from robot import MyRobot
-from driverStationInterface import DsInterface
+from driverStationInterface import DS_MODE_AUTO,DS_MODE_TELEOP,DS_MODE_TEST, DsInterface
+import machine
 
+def dsToRSMMode(enabled, mode):
+        if(not enabled):
+            return TR_MODE_DISABLED
+        else:
+            if(mode == DS_MODE_AUTO):
+                return TR_MODE_AUTONOMOUS
+            elif(mode == DS_MODE_TELEOP):
+                 return TR_MODE_TELEOP
+            else:
+                 return TR_MODE_TEST
 
 try:
     ds = DsInterface()
     print("Robot Code Starting...")
-    robot = MyRobot()
+    rsm = MainStateMachine(MyRobot())
+    ds.setCodeRunning(True)
     print("Robot Code Startup complete!")
-    robot.autonomousInit()
     while True:
         startTimeUs = time.ticks_us()
         ds.periodic()
-        robot.autonomousPeriodic()
-        robot.robotPeriodic()
+        rsm.set_mode(dsToRSMMode(ds.getEnabledCmd(), ds.getModeCmd()))
+        rsm.update()
         procTimeUs = time.ticks_us() - startTimeUs
         time.sleep_us(20*1000 - procTimeUs)  # 20ms loop time
 except Exception as e:

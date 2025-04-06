@@ -1,3 +1,18 @@
+# Why
+
+Economical robot platform that emulates the "look and feel" of frc programming as best as possible.
+
+# TODO
+
+* read in joystick data
+* add gyro support
+* add motor output support
+* verify periodic timing
+* robot mode state machine
+* robot signal light
+* design PCB
+* write docs
+
 
 # Docs
 
@@ -10,9 +25,11 @@
 
 # Setup
 
-`pip install esptool`
-`pip install mpremote`
-`pip install pyserial`
+```
+pip install esptool
+pip install mpremote
+pip install pyserial
+```
 
 # Deploy
 
