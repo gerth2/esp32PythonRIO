@@ -5,7 +5,7 @@ DS_MODE_AUTO = 2
 DS_MODE_TELEOP = 0
 DS_MODE_TEST = 1
 
-class FromDsPacket:
+class FromDsUDPPacket:
     def __init__(self, data: bytes):
         if len(data) < 6:
             raise ValueError("Packet too short")
@@ -117,7 +117,7 @@ class FromDsPacket:
         return s
 
 
-class ToDsPacket:
+class ToDsUDPPacket:
     def __init__(self, sequence_number: int = 0, comm_version: int = 0x01, status: int = 0, trace: int = 0,
                  battery_voltage: float = 12.0, request_date: bool = False):
         self.sequence_number = sequence_number
@@ -223,12 +223,12 @@ class ToDsPacket:
 class DsInterface():
     def __init__(self):
         self._init_WiFi()
-        self._setupTxSocket()
-        self._setupRxSocket()
+        self._setupUDPRxSocket()
         self.seqNum = 0
         self._modeCmd = DS_MODE_TELEOP
         self._enabledCmd = False
         self._codeRunning = False
+        self._dsAddr = None
 
     def periodic(self):
         self._readPacket()
@@ -246,10 +246,17 @@ class DsInterface():
         """
         https://frcture.readthedocs.io/en/latest/driverstation/ds_to_rio.html
         """
-        data = self.rxSocket.recv(512)
+        data, addr = self.rxUDPSocket.recvfrom(512)
+
+        if addr != self._dsAddr:
+            self._dsAddr = addr
+            print("New DS Connected:", addr)
+            self._setupUDPTxSocket()
+            #self._setupTCPSocket()
+
         if data:
             # Process the received packet as needed
-            packet = FromDsPacket(data)
+            packet = FromDsUDPPacket(data)
             #print(str(packet))
 
             # Pull out relevant packet data
@@ -265,11 +272,11 @@ class DsInterface():
         """
         https://frcture.readthedocs.io/en/latest/driverstation/rio_to_ds.html
         """
-        packet = ToDsPacket(seqNum, 0x01, 0x00, 0x00, 12.0, False)
+        packet = ToDsUDPPacket(seqNum, 0x01, 0x00, 0x00, 12.0, False)
         packet.set_status(False, False, not self._codeRunning, self._enabledCmd, self._modeCmd)
         packet.set_trace(self._codeRunning, True, self._modeCmd==DS_MODE_TEST, self._modeCmd==DS_MODE_AUTO, self._modeCmd==DS_MODE_TELEOP, not self._enabledCmd)
         #print(str(packet))
-        self.txSocket.write(packet.to_bytes())
+        self.txUDPSocket.write(packet.to_bytes())
         #print("===========")
     
     def _init_WiFi(self):
@@ -280,11 +287,15 @@ class DsInterface():
         self.ap.ipconfig(gw4="10.17.36.1")
         self.ap.active(True)                       # activate the interface
 
-    def _setupTxSocket(self):
-        self.txSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.txSocket.connect(("10.17.36.3", 1150))
-        self.txSocket.setblocking(True)
+    def _setupUDPTxSocket(self):
+        self.txUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.txUDPSocket.connect((self._dsAddr[0], 1150)) # TODO - hardcoded ds address? blech
+        self.txUDPSocket.setblocking(True)
 
-    def _setupRxSocket(self):
-        self.rxSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.rxSocket.bind(("0.0.0.0", 1110))
+    def _setupUDPRxSocket(self):
+        self.rxUDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.rxUDPSocket.bind(("0.0.0.0", 1110))
+
+    def _setupTCPSocket(self):
+        self.tcpSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tcpSocket.connect((self._dsAddr[0], 1740))    # TCP connection
