@@ -1,4 +1,4 @@
-# import machine  # Uncomment this in your MicroPython environment
+import machine  # Uncomment this in your MicroPython environment
 
 class VoltageMonitor:
     def __init__(

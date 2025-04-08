@@ -15,7 +15,7 @@ class MyRobot(TimedRobot):
         pass
 
     def teleopPeriodic(self):
-        print("My Teleop!")
+        print("Hello from ESP32!")
 
     def robotPeriodic(self):
         pass

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Edit robot.py</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 1em;
+    }
+    textarea {
+      width: 100%;
+      height: 80vh;
+      font-family: monospace;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      padding: 0.5em;
+      box-sizing: border-box;
+    }
+    #status.modified {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h2>Edit <code>robot.py</code></h2>
+  <button onclick="save()">Save</button>
+  <button onclick="run()">Run</button>
+  <button onclick="stop()">Stop</button>
+  <span id="status"></span>
+  <br><br>
+  <textarea id="editor"></textarea>
+
+  <script>
+    const textarea = document.getElementById("editor");
+    const status = document.getElementById("status");
+    let modified = false;
+
+    textarea.addEventListener("input", () => {
+      modified = true;
+      status.textContent = "Modified";
+      status.className = "modified";
+    });
+
+    fetch("/robot.py")
+      .then(res => res.text())
+      .then(text => {
+        textarea.value = text;
+        modified = false;
+        status.textContent = "Loaded";
+        status.className = "";
+      });
+
+    function save() {
+      fetch("/save", {
+        method: "POST",
+        body: textarea.value
+      }).then(() => {
+        modified = false;
+        status.textContent = "Saved";
+        status.className = "";
+      });
+    }
+
+    function run() {
+      fetch("/run", {
+        method: "POST",
+        body: textarea.value
+      }).then(() => {
+        modified = false;
+        status.textContent = "Running...";
+        status.className = "";
+      });
+    }
+
+    function stop() {
+      fetch("/stop", { method: "POST" })
+        .then(() => {
+          status.textContent = "Stopped";
+          status.className = "";
+        });
+    }
+  </script>
+</body>
+</html>

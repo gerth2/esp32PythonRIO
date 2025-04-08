@@ -1,9 +1,9 @@
 from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, TR_MODE_TEST, MainStateMachine
 import sys, time
 from robot import MyRobot
-from driverStationInterface import DS_MODE_AUTO,DS_MODE_TELEOP,DS_MODE_TEST, DsInterface
-from NT3Server import MinimalNT3Server
-from RobotSignalLight import RobotSignalLight
+from private.driverStationInterface import DS_MODE_AUTO,DS_MODE_TELEOP,DS_MODE_TEST, DsInterface
+from private.RobotSignalLight import RobotSignalLight
+from private.webEditor import WebEditorServer
 import machine
 
 
@@ -24,19 +24,24 @@ try:
     #nt = MinimalNT3Server()
     rsl = RobotSignalLight()
     rsm = MainStateMachine(MyRobot())
+    editor = WebEditorServer()
 
     ds.setCodeRunning(True)
     print("Robot Code Startup complete!")
     while True:
         startTimeUs = time.ticks_us()
-        ds.periodic()
+        #ds.periodic()
 
         rsm.set_mode(dsToRSMMode(ds.getEnabledCmd(), ds.getModeCmd()))
         rsm.update()
 
+        editor.update()  # handle web requests
+        if editor.get_state() == "running":
+            print("[WebEditor] Running robot code")
+
         
-        #nt.send_data("robotMode", ds.getModeCmd())
-        #nt.send_data("robotEnabled", ds.getEnabledCmd())
+        #nt.publish("robotMode", ds.getModeCmd())
+        #nt.publish("robotEnabled", ds.getEnabledCmd())
         #nt.update()
 
         rsl.set_enabled(ds.getEnabledCmd())

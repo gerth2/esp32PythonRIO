@@ -1,7 +1,7 @@
 import network, socket, time
 import struct, io
-from TCPServerManager import TCPServerManager
-from ESP32Stats import ESP32SystemStats
+from private.TCPServerManager import TCPServerManager
+from private.ESP32Stats import ESP32SystemStats
 
 
 DS_MODE_AUTO = 2
@@ -251,15 +251,15 @@ class ToDSTCPPacket:
         self.tags.append({
             'id': 0x0A,  # Version Info tag ID
             'data': struct.pack('!B', device_type) + bytes([0x00,0x00]) + struct.pack('!B', can_id) +
-                   struct.pack('!H', len(name)) + name.encode('utf-8') +
-                   struct.pack('!H', len(version)) + version.encode('utf-8')
+                   b'x0f' + name.encode('utf-8') +
+                   b'x0f' + version.encode('utf-8') + b'x000000000000'
         })
 
     def add_standard_output(self, timestamp, seq_num, message):
         # Standard Output tag: timestamp (4 bytes), seq_num (2 bytes), message (variable length)
         self.tags.append({
             'id': 0x0C,  # Standard Output tag ID
-            'data': struct.pack('!f', timestamp) + struct.pack('!H', seq_num) + struct.pack('!H', len(message)) + message.encode('utf-8')
+            'data': struct.pack('!f', timestamp) + struct.pack('!H', seq_num) + message.encode('utf-8')
         })
 
     def to_bytes(self):
@@ -346,14 +346,8 @@ class DsInterface():
             if self._tcpMgr.is_connected():
                 data = self._tcpMgr.recv()
                 if data:
-                    #print("Got data:", data)
-                    #self._tcpMgr.send(b"ack")
                     dataPkt = ToDSTCPPacket()
-                    dataPkt.add_disable_faults(0, 0)
-                    dataPkt.add_rail_faults(0, 0, 0)
                     dataPkt.add_version_info(0, 0, "robot", "1.0")
-                    dataPkt.add_standard_output(time.ticks_ms()/1000.0, self._stdoutSeqNum, "Hello from ESP32")
-                    self._stdoutSeqNum += 1
                     self._tcpMgr.send(dataPkt.to_bytes())
 
     def _sendPeriodicPacket(self, seqNum):
