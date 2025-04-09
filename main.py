@@ -1,50 +1,42 @@
 from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, TR_MODE_TEST, MainStateMachine
 import sys, time
 from robot import MyRobot
-from private.driverStationInterface import DS_MODE_AUTO,DS_MODE_TELEOP,DS_MODE_TEST, DsInterface
 from private.RobotSignalLight import RobotSignalLight
 from private.webEditor import WebEditorServer
 import machine
+import network
 
-
-def dsToRSMMode(enabled, mode):
-        if(not enabled):
-            return TR_MODE_DISABLED
-        else:
-            if(mode == DS_MODE_AUTO):
-                return TR_MODE_AUTONOMOUS
-            elif(mode == DS_MODE_TELEOP):
-                 return TR_MODE_TELEOP
-            else:
-                 return TR_MODE_TEST
+# Init WiFi
+ap = network.WLAN(network.WLAN.IF_AP) # create access-point interface
+ap.config(ssid='ESP-1736-ROBOT')      # set the SSID of the access point
+ap.config(max_clients=2)              # set how many clients can connect to the network
+ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0"))
+ap.ipconfig(gw4="10.17.36.1")
+ap.active(True)                       # activate the interface
 
 try:
-    ds = DsInterface()
     print("Robot Code Starting...")
-    #nt = MinimalNT3Server()
     rsl = RobotSignalLight()
     rsm = MainStateMachine(MyRobot())
     editor = WebEditorServer()
 
-    ds.setCodeRunning(True)
     print("Robot Code Startup complete!")
     while True:
         startTimeUs = time.ticks_us()
-        #ds.periodic()
 
-        rsm.set_mode(dsToRSMMode(ds.getEnabledCmd(), ds.getModeCmd()))
-        rsm.update()
 
         editor.update()  # handle web requests
-        if editor.get_state() == "running":
-            print("[WebEditor] Running robot code")
 
+        if editor.state == "running":
+            rsm.set_mode(TR_MODE_DISABLED)
+        elif editor.mode == "teleop":
+            rsm.set_mode(TR_MODE_TELEOP)
+        elif editor.mode == "autonomous":
+            rsm.set_mode(TR_MODE_AUTONOMOUS)
         
-        #nt.publish("robotMode", ds.getModeCmd())
-        #nt.publish("robotEnabled", ds.getEnabledCmd())
-        #nt.update()
+        rsm.update()
 
-        rsl.set_enabled(ds.getEnabledCmd())
+        rsl.set_enabled(editor.state == "running")
         rsl.update(time.ticks_ms())
 
         procTimeUs = time.ticks_us() - startTimeUs

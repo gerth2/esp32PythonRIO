@@ -6,16 +6,16 @@ class MyRobot(TimedRobot):
         pass
 
     def autonomousInit(self):
-        pass
+        print("myAuto")
 
     def autonomousPeriodic(self):
-        print("My Auto!")
-
-    def teleopInit(self):
         pass
 
+    def teleopInit(self):
+        print("myTeleop")
+
     def teleopPeriodic(self):
-        print("Hello from ESP32!")
+        pass
 
     def robotPeriodic(self):
         pass

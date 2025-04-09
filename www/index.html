@@ -1,86 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Edit robot.py</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f0f0;
-      padding: 1em;
-    }
-    textarea {
-      width: 100%;
-      height: 80vh;
-      font-family: monospace;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      padding: 0.5em;
-      box-sizing: border-box;
-    }
-    #status.modified {
-      color: red;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Robot Code Editor</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .top {
+            height: 75%;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid #ccc;
+        }
+    
+        .bottom {
+            height: 25%;
+            display: flex;
+        }
+    
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 5px;
+            background: #eee;
+            align-items: center;
+        }
+    
+        .editor-status {
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #666;
+        }
+    
+        #editor {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre;
+            overflow: auto;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background: #fefefe;
+        }
+    
+        .ds-left,
+        .ds-right {
+            flex: 1;
+            padding: 10px;
+        }
+    
+        .ds-left {
+            border-right: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+    
+        .ds-right {
+            background: black;
+            color: lime;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            height: 100%; /* Ensure it fills the available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Ensure it scrolls to the bottom */
+        }
+    
+        .mode-select,
+        .state-toggle {
+            display: flex;
+            gap: 10px;
+        }
+    
+        .state-toggle button {
+            padding: 10px;
+            font-weight: bold;
+        }
+    
+        .enabled {
+            background: green;
+            color: white;
+        }
+    
+        .disabled {
+            background: red;
+            color: white;
+        }
+    </style>
 </head>
+
 <body>
-  <h2>Edit <code>robot.py</code></h2>
-  <button onclick="save()">Save</button>
-  <button onclick="run()">Run</button>
-  <button onclick="stop()">Stop</button>
-  <span id="status"></span>
-  <br><br>
-  <textarea id="editor"></textarea>
 
-  <script>
-    const textarea = document.getElementById("editor");
-    const status = document.getElementById("status");
-    let modified = false;
+    <div class="top">
+        <div class="editor-toolbar">
+            <button id="save">Save</button>
+            <button id="download">Download</button>
+            <input type="file" id="upload" style="display:none" />
+            <button onclick="document.getElementById('upload').click()">Upload</button>
+            <span id="status" class="editor-status">Unchanged</span>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+    </div>
 
-    textarea.addEventListener("input", () => {
-      modified = true;
-      status.textContent = "Modified";
-      status.className = "modified";
-    });
+    <div class="bottom">
+        <div class="ds-left">
+            <div class="mode-select">
+                <label><input type="radio" name="mode" value="teleop" checked> Teleop</label>
+                <label><input type="radio" name="mode" value="auto"> Autonomous</label>
+            </div>
+            <div class="state-toggle">
+                <button id="enable" class="enabled">Enabled</button>
+                <button id="disable" class="disabled">Disabled</button>
+            </div>
+        </div>
+        <div id="console" class="ds-right"></div>
+    </div>
 
-    fetch("/robot.py")
-      .then(res => res.text())
-      .then(text => {
-        textarea.value = text;
-        modified = false;
-        status.textContent = "Loaded";
-        status.className = "";
-      });
-
-    function save() {
-      fetch("/save", {
-        method: "POST",
-        body: textarea.value
-      }).then(() => {
-        modified = false;
-        status.textContent = "Saved";
-        status.className = "";
-      });
-    }
-
-    function run() {
-      fetch("/run", {
-        method: "POST",
-        body: textarea.value
-      }).then(() => {
-        modified = false;
-        status.textContent = "Running...";
-        status.className = "";
-      });
-    }
-
-    function stop() {
-      fetch("/stop", { method: "POST" })
-        .then(() => {
-          status.textContent = "Stopped";
-          status.className = "";
+    <script>
+        const editor = document.getElementById('editor');
+        const status = document.getElementById('status');
+        const enableBtn = document.getElementById('enable');
+        const disableBtn = document.getElementById('disable');
+        const consoleEl = document.getElementById('console');
+        let isChanged = false;
+        let isEnabled = true;
+    
+        // Save, Download, Upload logic
+        document.getElementById('save').onclick = () => {
+            fetch('/save', { method: 'POST', body: editor.value });
+            isChanged = false;
+            updateStatus();
+        };
+    
+        document.getElementById('download').onclick = () => {
+            const blob = new Blob([editor.value], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.download = 'robot.py';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        };
+    
+        document.getElementById('upload').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                file.text().then(text => {
+                    editor.value = text;
+                    isChanged = true;
+                    updateStatus();
+                });
+            }
+        };
+    
+        editor.addEventListener('input', () => {
+            isChanged = true;
+            updateStatus();
         });
-    }
-  </script>
+    
+        function updateStatus() {
+            status.textContent = isChanged ? 'Modified' : 'Unchanged';
+        }
+    
+        // Driver station logic
+        function updateEditorLock() {
+            editor.disabled = isEnabled;
+        }
+    
+        function sendState() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const state = isEnabled ? mode : "disabled";
+            fetch('/state', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state })
+            });
+            fetch('/mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode })
+            });
+        }
+    
+        enableBtn.onclick = () => {
+            isEnabled = true;
+            updateEditorLock();
+            sendState();
+        };
+        disableBtn.onclick = () => {
+            isEnabled = false;
+            updateEditorLock();
+            sendState();
+        };
+    
+        updateEditorLock(); // Initial lock
+    
+        // Load robot.py from server on page load
+        fetch('/robot.py')
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to load robot.py");
+                return res.text();
+            })
+            .then(text => {
+                editor.value = text;
+                isChanged = false;
+                updateStatus();
+            })
+            .catch(err => {
+                console.error('Error loading robot.py:', err);
+                status.textContent = 'Error loading file';
+            });
+    
+        // Polling to fetch console log data every 1 second
+        function fetchConsoleLog() {
+            fetch('/console')
+                .then(response => response.text())
+                .then(data => {
+                    // Append the new data to the console
+                    consoleEl.textContent = data;
+                    consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
+                })
+                .catch(err => {
+                    console.error('Error fetching console log:', err);
+                });
+        }
+    
+        // Fetch console log periodically (every 1 second)
+        setInterval(fetchConsoleLog, 1000);
+    </script>
+    
 </body>
+
 </html>
