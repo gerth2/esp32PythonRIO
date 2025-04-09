@@ -27,16 +27,16 @@ try:
 
         editor.update()  # handle web requests
 
-        if editor.state == "running":
+        if editor.state == "disabled":
             rsm.set_mode(TR_MODE_DISABLED)
-        elif editor.mode == "teleop":
+        elif editor.state == "teleop":
             rsm.set_mode(TR_MODE_TELEOP)
-        elif editor.mode == "autonomous":
+        elif editor.state == "auto":
             rsm.set_mode(TR_MODE_AUTONOMOUS)
         
         rsm.update()
 
-        rsl.set_enabled(editor.state == "running")
+        rsl.set_enabled(editor.state != "disabled")
         rsl.update(time.ticks_ms())
 
         procTimeUs = time.ticks_us() - startTimeUs

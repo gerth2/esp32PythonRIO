@@ -7,8 +7,7 @@ class WebEditorServer:
     def __init__(self, port=8080):
         self.port = port
         self.locked = False
-        self.state = "stopped"
-        self.mode = "teleop"
+        self.state = "disabled"
         self.console_log = ""
         self.max_log_size = 5000
 
@@ -57,7 +56,12 @@ class WebEditorServer:
     def _handle_client(self, conn):
         try:
             request = conn.recv(1024).decode()
-            method, path, *_ = request.split(" ", 2)
+            method, path, request_data = request.split(" ", 2)
+
+            #print(f"[WebEditor] Request method: {method}")
+            #print(f"[WebEditor] Request path: {path}")
+            #print(f"[WebEditor] Request data: {request_data}")
+
 
             if path == "/":
                 print(f"[WebEditor] Request: Serve Main UI")
@@ -73,46 +77,22 @@ class WebEditorServer:
                 print(f"[WebEditor] Request: Load File")
                 self._send_response(conn, self._read_robot_file())
 
-            elif path.startswith("/mode"):
-                try:
-                    # Read the request body (assuming you're reading the POST data into `request_data`)
-                    request_data = conn.recv(1024).decode()  # Adjust the size accordingly
-                    
-                    # Parse the JSON body
-                    data = json.loads(request_data)
-                    print(f"[WebEditor] Received mode data: {data}")
-                    
-                    # Extract the mode from the JSON
-                    if 'value' in data:
-                        self.mode = data['value']
-                        print(f"[WebEditor] Mode is now {self.mode}")
-                    
-                    self._send_response(conn, "OK")
-
-                except json.JSONDecodeError:
-                    print("[WebEditor] Failed to decode JSON in /mode")
-                    self._send_response(conn, "Error: Invalid JSON", status=400)
-
             elif path.startswith("/state"):
                 try:
-                    # Read the request body (assuming you're reading the POST data into `request_data`)
-                    request_data = conn.recv(1024).decode()  # Adjust the size accordingly
-                    
-                    # Parse the JSON body
-                    data = json.loads(request_data)
+                    # Split headers from body
+                    _, _, body = request_data.partition('\r\n\r\n')
+
+                    # Parse JSON body
+                    data = json.loads(body)
                     print(f"[WebEditor] Received state data: {data}")
-                    
-                    # Extract the enabled state from the JSON
-                    if 'enabled' in data:
-                        enabled = data['enabled'] == "true"
-                        self.state = "running" if enabled else "stopped"
-                        print(f"[WebEditor] State is now {self.state}")
+                    self.state = data['state']
+                    print(f"[WebEditor] Robot State is now {self.state}")
                     
                     self._send_response(conn, "OK")
 
-                except json.JSONDecodeError:
+                except:
                     print("[WebEditor] Failed to decode JSON in /state")
-                    self._send_response(conn, "Error: Invalid JSON", status=400)
+                    self._send_response(conn, "Error: Invalid JSON", status="400 BAD")
 
             elif path.startswith("/console"):
                 self._send_response(conn, self.console_log[-1000:], "text/plain")

@@ -15,3 +15,5 @@ for %%f in (www/*.*) do (
 )
 
 mpremote soft-reset
+
+mpremote
