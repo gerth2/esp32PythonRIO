@@ -1,6 +1,7 @@
 from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, TR_MODE_TEST, MainStateMachine
 import sys, time
 from robot import MyRobot
+from private.Hardware import Hardware
 from private.RobotSignalLight import RobotSignalLight
 from private.webEditor import WebEditorServer
 import machine
@@ -14,6 +15,9 @@ ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0"))
 ap.ipconfig(gw4="10.17.36.1")
 ap.active(True)                       # activate the interface
 
+#Init physical hardware
+hw = Hardware()
+
 try:
     print("Robot Code Starting...")
     rsl = RobotSignalLight()
@@ -26,6 +30,15 @@ try:
 
 
         editor.update()  # handle web requests
+
+        # Reload robot.py if needed
+        if editor.getFileChanged():
+            print("*********** USER ROBOT CODE STARTING ******************")
+            del sys.modules["robot"]  # Force re-import
+            userMod = __import__("robot")
+            rsm = MainStateMachine(userMod.MyRobot())
+            print("***********       CODE RUNNING!      ******************")
+
 
         if editor.state == "disabled":
             rsm.set_mode(TR_MODE_DISABLED)

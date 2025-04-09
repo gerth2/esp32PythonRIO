@@ -6,6 +6,9 @@ class DualMotorDriver:
         """Initialize motor driver with 2 pins per motor."""
         self.freq = freq
 
+        print(f"Pins: {left_pin1}, {left_pin2}, {right_pin1}, {right_pin2}")
+
+
         # Left motor pins
         self.left_pwm1 = PWM(Pin(left_pin1), freq=freq)
         self.left_pwm2 = PWM(Pin(left_pin2), freq=freq)

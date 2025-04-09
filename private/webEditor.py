@@ -10,6 +10,7 @@ class WebEditorServer:
         self.state = "disabled"
         self.console_log = ""
         self.max_log_size = 5000
+        self.fileChanged = False
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
@@ -39,12 +40,18 @@ class WebEditorServer:
                 return f.read()
         except:
             return ""
+        
+    def getFileChanged(self):
+        retVal = self.fileChanged 
+        self.fileChanged = False
+        return retVal
 
     def _write_robot_file(self, data):
         if self.locked:
             return False
         with open("robot.py", "w") as f:
             f.write(data)
+            self.fileChanged = True
         return True
 
     def _guess_content_type(self, path):
@@ -67,9 +74,9 @@ class WebEditorServer:
                 print(f"[WebEditor] Request: Serve Main UI")
                 self._serve_file(conn, "/index.html")
 
-            elif path.startswith("/save") and method == "POST":
+            elif path.startswith("/deploy") and method == "POST":
                 body = self._get_body(request, conn)
-                print(f"[WebEditor] Request: Save File")
+                print(f"[WebEditor] Request: Deploy File")
                 self._write_robot_file(body)
                 self._send_response(conn, "OK")
 

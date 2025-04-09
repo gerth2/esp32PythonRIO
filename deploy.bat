@@ -16,4 +16,5 @@ for %%f in (www/*.*) do (
 
 mpremote soft-reset
 
+::Open shell to view program progress
 mpremote

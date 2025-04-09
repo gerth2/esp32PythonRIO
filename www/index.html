@@ -104,7 +104,7 @@
 
     <div class="top">
         <div class="editor-toolbar">
-            <button id="save">Save</button>
+            <button id="deploy">Deploy</button>
             <button id="download">Download</button>
             <input type="file" id="upload" style="display:none" />
             <button onclick="document.getElementById('upload').click()">Upload</button>
@@ -136,9 +136,9 @@
         let isChanged = false;
         let isEnabled = true;
     
-        // Save, Download, Upload logic
-        document.getElementById('save').onclick = () => {
-            fetch('/save', { method: 'POST', body: editor.value });
+        // Deploy, Download, Upload logic
+        document.getElementById('deploy').onclick = () => {
+            fetch('/deploy', { method: 'POST', body: editor.value });
             isChanged = false;
             updateStatus();
         };

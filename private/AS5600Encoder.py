@@ -8,10 +8,10 @@ class AS5600Encoder:
     RAW_ANGLE_REGISTER = 0x0C
 
     def __init__(self, i2c_bus):
-
         self.i2c = i2c_bus
-        self.last_angle = self.read_position()
         self.last_time = self._now()
+        self.last_angle = 0.0
+        self.last_angle = self.read_position()
 
     def _now(self):
         return ticks_ms()

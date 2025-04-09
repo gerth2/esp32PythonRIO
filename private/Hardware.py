@@ -2,6 +2,7 @@ from machine import Pin, I2C
 from private.AS5600Encoder import AS5600Encoder
 from private.DualMotorControl import DualMotorDriver
 from private.MPU6050ZGyro import MPU6050ZGyro
+from private.voltageMonitor import VoltageMonitor
 
 I2C_BUS_A_SCL = 22
 I2C_BUS_A_SDA = 21
@@ -11,8 +12,10 @@ I2C_BUS_B_SCL = 18
 I2C_BUS_B_SDA = 19
 I2C_BUS_B_FREQ = 400_000
 
-LEFT_MOTOR_PIN_1 = 23
-LEFT_MOTOR_PIN_2 = 24
+LEFT_MOTOR_PIN_1 = 32
+LEFT_MOTOR_PIN_2 = 33
+
+VMON_PIN = 34
 
 RIGHT_MOTOR_PIN_1 = 25
 RIGHT_MOTOR_PIN_2 = 26
@@ -26,3 +29,4 @@ class Hardware:
         self.rightEnc = AS5600Encoder(self.i2cBusB)
         self.gyro = MPU6050ZGyro(self.i2cBusA)
         self.motors = DualMotorDriver(LEFT_MOTOR_PIN_1, LEFT_MOTOR_PIN_2, RIGHT_MOTOR_PIN_1, RIGHT_MOTOR_PIN_2)
+        self.vMon = VoltageMonitor(pin=VMON_PIN)
