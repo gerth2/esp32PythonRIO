@@ -119,4 +119,25 @@ function fetchConsoleLog() {
         });
 }
 
-setInterval(fetchConsoleLog, 1000);
+setInterval(fetchConsoleLog, 250);
+
+// Ensure that "tab" in the text area causes a tab character to be inserted instead of moving focus
+document.getElementById('editor').addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();  // Prevent default tab behavior (moving focus)
+
+        // Get the current position of the cursor
+        const textarea = e.target;
+        const cursorPos = textarea.selectionStart;
+
+        // Get the text before and after the cursor
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter = textarea.value.substring(cursorPos);
+
+        // Insert a tab character
+        textarea.value = textBefore + '    ' + textAfter;
+
+        // Move the cursor position after the inserted tab
+        textarea.selectionStart = textarea.selectionEnd = cursorPos + 4;
+    }
+});
