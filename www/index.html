@@ -4,100 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Robot Code Editor</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-    
-        .top {
-            height: 75%;
-            display: flex;
-            flex-direction: column;
-            border-bottom: 2px solid #ccc;
-        }
-    
-        .bottom {
-            height: 25%;
-            display: flex;
-        }
-    
-        .editor-toolbar {
-            display: flex;
-            gap: 10px;
-            padding: 5px;
-            background: #eee;
-            align-items: center;
-        }
-    
-        .editor-status {
-            margin-left: auto;
-            font-size: 0.9em;
-            color: #666;
-        }
-    
-        #editor {
-            flex: 1;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.4;
-            white-space: pre;
-            overflow: auto;
-            padding: 10px;
-            border-top: 1px solid #ccc;
-            background: #fefefe;
-        }
-    
-        .ds-left,
-        .ds-right {
-            flex: 1;
-            padding: 10px;
-        }
-    
-        .ds-left {
-            border-right: 2px solid #ccc;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-    
-        .ds-right {
-            background: black;
-            color: lime;
-            font-family: monospace;
-            font-size: 14px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            height: 100%; /* Ensure it fills the available space */
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end; /* Ensure it scrolls to the bottom */
-        }
-    
-        .mode-select,
-        .state-toggle {
-            display: flex;
-            gap: 10px;
-        }
-    
-        .state-toggle button {
-            padding: 10px;
-            font-weight: bold;
-        }
-    
-        .enabled {
-            background: green;
-            color: white;
-        }
-    
-        .disabled {
-            background: red;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
@@ -116,123 +23,29 @@
     <div class="bottom">
         <div class="ds-left">
             <div class="mode-select">
-                <label><input type="radio" name="mode" value="teleop" checked> Teleop</label>
-                <label><input type="radio" name="mode" value="auto"> Autonomous</label>
+                <button id="teleopBtn" class="active">TeleOperated</button>
+                <button id="autoBtn">Autonomous</button>
             </div>
-            <div class="state-toggle">
-                <button id="enable" class="enabled">Enabled</button>
-                <button id="disable" class="disabled">Disabled</button>
+            <div class="state-select">
+                <button id="enable" class="enabled">Enable</button>
+                <button id="disable" class="disabled">Disable</button>
             </div>
+        </div>
+        <div class="ds-center">
+            <table class="status-table">
+                <tr><td>Robot #</td><td id="status-robot-num">1</td></tr>
+                <tr><td>Battery</td><td id="status-battery">8.43V</td></tr>
+                <tr><td>Comm</td><td><span class="status-check true" id="status-comm">✔</span></td></tr>
+                <tr><td>Code</td><td><span class="status-check true" id="status-code">✔</span></td></tr>
+                <tr><td>Joystick</td><td><span class="status-check false" id="status-joystick">✘</span></td></tr>
+            </table>
+            <div class="status-text" id="status-message">Teleop</div>
         </div>
         <div id="console" class="ds-right"></div>
     </div>
 
-    <script>
-        const editor = document.getElementById('editor');
-        const status = document.getElementById('status');
-        const enableBtn = document.getElementById('enable');
-        const disableBtn = document.getElementById('disable');
-        const consoleEl = document.getElementById('console');
-        let isChanged = false;
-        let isEnabled = true;
-    
-        // Deploy, Download, Upload logic
-        document.getElementById('deploy').onclick = () => {
-            fetch('/deploy', { method: 'POST', body: editor.value });
-            isChanged = false;
-            updateStatus();
-        };
-    
-        document.getElementById('download').onclick = () => {
-            const blob = new Blob([editor.value], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.download = 'robot.py';
-            link.href = URL.createObjectURL(blob);
-            link.click();
-        };
-    
-        document.getElementById('upload').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                file.text().then(text => {
-                    editor.value = text;
-                    isChanged = true;
-                    updateStatus();
-                });
-            }
-        };
-    
-        editor.addEventListener('input', () => {
-            isChanged = true;
-            updateStatus();
-        });
-    
-        function updateStatus() {
-            status.textContent = isChanged ? 'Modified' : 'Unchanged';
-        }
-    
-        // Driver station logic
-        function updateEditorLock() {
-            editor.disabled = isEnabled;
-        }
-    
-        function sendState() {
-            const mode = document.querySelector('input[name="mode"]:checked').value;
-            const state = isEnabled ? mode : "disabled";
-            fetch('/state', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ state })
-            });
-        }
-    
-        enableBtn.onclick = () => {
-            isEnabled = true;
-            updateEditorLock();
-            sendState();
-        };
-        disableBtn.onclick = () => {
-            isEnabled = false;
-            updateEditorLock();
-            sendState();
-        };
-    
-        updateEditorLock(); // Initial lock
-    
-        // Load robot.py from server on page load
-        fetch('/robot.py')
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to load robot.py");
-                return res.text();
-            })
-            .then(text => {
-                editor.value = text;
-                isChanged = false;
-                updateStatus();
-            })
-            .catch(err => {
-                console.error('Error loading robot.py:', err);
-                status.textContent = 'Error loading file';
-            });
-    
-        // Polling to fetch console log data every 1 second
-        function fetchConsoleLog() {
-            fetch('/console')
-                .then(response => response.text())
-                .then(data => {
-                    // Append the new data to the console
-                    consoleEl.textContent = data;
-                    consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
-                })
-                .catch(err => {
-                    console.error('Error fetching console log:', err);
-                });
-        }
-    
-        // Fetch console log periodically (every 1 second)
-        setInterval(fetchConsoleLog, 1000);
-    </script>
-    
+    <script src="main.js"></script>
+
 </body>
 
 </html>

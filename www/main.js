@@ -1,0 +1,122 @@
+const editor = document.getElementById('editor');
+const status = document.getElementById('status');
+const enableBtn = document.getElementById('enable');
+const disableBtn = document.getElementById('disable');
+const consoleEl = document.getElementById('console');
+const teleopBtn = document.getElementById('teleopBtn');
+const autoBtn = document.getElementById('autoBtn');
+let isChanged = false;
+let isEnabled = false;
+let currentMode = 'disabled';
+
+// Deploy, Download, Upload logic
+document.getElementById('deploy').onclick = () => {
+    fetch('/deploy', { method: 'POST', body: editor.value });
+    isChanged = false;
+    updateStatus();
+};
+
+document.getElementById('download').onclick = () => {
+    const blob = new Blob([editor.value], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.download = 'robot.py';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+};
+
+document.getElementById('upload').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        file.text().then(text => {
+            editor.value = text;
+            isChanged = true;
+            updateStatus();
+        });
+    }
+};
+
+editor.addEventListener('input', () => {
+    isChanged = true;
+    updateStatus();
+});
+
+function updateStatus() {
+    status.textContent = isChanged ? 'Modified' : 'Unchanged';
+}
+
+// Driver station logic
+function updateEditorLock() {
+    editor.disabled = isEnabled;
+}
+
+function sendState() {
+    const state = isEnabled ? currentMode : "disabled";
+    fetch('/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state })
+    });
+}
+
+enableBtn.onclick = () => {
+    isEnabled = true;
+    updateEditorLock();
+    sendState();
+};
+disableBtn.onclick = () => {
+    isEnabled = false;
+    updateEditorLock();
+    sendState();
+};
+
+updateEditorLock(); // Initial lock
+
+// Toggle mode buttons
+teleopBtn.onclick = () => {
+    if (currentMode !== 'teleop') {
+        currentMode = 'teleop';
+        teleopBtn.classList.add('active');
+        autoBtn.classList.remove('active');
+        sendState();
+    }
+};
+
+autoBtn.onclick = () => {
+    if (currentMode !== 'auto') {
+        currentMode = 'auto';
+        autoBtn.classList.add('active');
+        teleopBtn.classList.remove('active');
+        sendState();
+    }
+};
+
+// Load robot.py from server on page load
+fetch('/robot.py')
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to load robot.py");
+        return res.text();
+    })
+    .then(text => {
+        editor.value = text;
+        isChanged = false;
+        updateStatus();
+    })
+    .catch(err => {
+        console.error('Error loading robot.py:', err);
+        status.textContent = 'Error loading file';
+    });
+
+// Polling to fetch console log data every 1 second
+function fetchConsoleLog() {
+    fetch('/console')
+        .then(response => response.text())
+        .then(data => {
+            consoleEl.textContent = data;
+            consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
+        })
+        .catch(err => {
+            console.error('Error fetching console log:', err);
+        });
+}
+
+setInterval(fetchConsoleLog, 1000);

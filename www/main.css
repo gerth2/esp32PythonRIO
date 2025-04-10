@@ -1,0 +1,187 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    height: 100%;
+    overflow: hidden; /* prevent page scrolling */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.top {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid #ccc;
+    min-height: 0; /* for proper flexbox behavior */
+}
+
+.bottom {
+    height: 25%;
+    display: flex;
+    background: #2d2d2d;
+    padding: 5px;
+    gap: 5px;
+    box-sizing: border-box;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 10px;
+    padding: 5px;
+    background: #eee;
+    align-items: center;
+}
+
+.editor-status {
+    margin-left: auto;
+    font-size: 0.9em;
+    color: #666;
+}
+
+#editor {
+    flex: 1;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: pre;
+    overflow: auto;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background: #fefefe;
+    width: 98%; /* Make editor expand horizontally */
+}
+
+.ds-left,
+.ds-center,
+.ds-right {
+    padding: 10px;
+    background: #464646;
+    border-radius: 10px;
+    color: white;
+}
+
+.ds-left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.ds-center {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ds-right {
+    background: #2d2d2d;
+    color: lime;
+    font-family: monospace;
+    font-size: 14px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex: 1;
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.mode-select {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mode-select button {
+    padding: 10px;
+    font-weight: bold;
+    background: #464646;
+    color: white;
+    border: 1px solid #2d2d2d;
+    border-radius: 5px;
+}
+
+.mode-select button.active {
+    background: #2d2d2d;
+}
+
+
+.state-select {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.state-select button {
+    padding: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    background: #464646;
+    border: 1px solid #2d2d2d;
+    border-radius: 5px;
+}
+
+.enabled {
+    background: #464646;
+    color: #00AA00;
+    border: 1px solid #2d2d2d;
+    border-radius: 5px;
+}
+
+.enabled:active  {
+    background: #2d2d2d;
+    color: lime;
+}
+
+.disabled {
+    background: #464646;
+    color: #DD4444;
+    border: 1px solid #2d2d2d;
+    border-radius: 5px;
+}
+
+.disabled:active {
+    background: #2d2d2d;
+    color: #FF2222;
+}
+
+.status-table {
+    border-collapse: collapse;
+    color: white;
+    font-size: 14px;
+}
+
+.status-table td {
+    padding: 2px 6px;
+}
+
+.status-table td:first-child {
+    font-weight: bold;
+}
+
+.status-text {
+    margin-top: 10px;
+    font-style: italic;
+    color: #ccc;
+}
+
+.status-check {
+    font-size: 16px;
+}
+
+.status-check.true {
+    color: lime;
+}
+
+.status-check.false {
+    color: red;
+}
