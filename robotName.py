@@ -1,0 +1,1 @@
+ROBOT_NAME = "ROBOT1"

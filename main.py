@@ -4,12 +4,13 @@ from robot import MyRobot
 from private.Hardware import Hardware
 from private.RobotSignalLight import RobotSignalLight
 from private.webEditor import WebEditorServer
+from robotName import ROBOT_NAME
 import machine
 import network
 
 # Init WiFi
 ap = network.WLAN(network.WLAN.IF_AP) # create access-point interface
-ap.config(ssid='ESP-1736-ROBOT')      # set the SSID of the access point
+ap.config(ssid=f'ESP-1736-{ROBOT_NAME}')      # set the SSID of the access point
 ap.config(max_clients=2)              # set how many clients can connect to the network
 ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0"))
 ap.ipconfig(gw4="10.17.36.1")

@@ -2,6 +2,7 @@ import usocket as socket
 import uos
 import builtins
 import sys, json
+from robotName import ROBOT_NAME
 
 class WebEditorServer:
     def __init__(self, port=8080):
@@ -11,11 +12,15 @@ class WebEditorServer:
         self.console_log = ""
         self.max_log_size = 5000
         self.fileChanged = False
+        self._batVoltage = 9.12
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
 
         self._start_server()
+
+    def set_batVoltage(self, voltage):
+        self._batVoltage = voltage
 
     def _tee_print(self, *args, **kwargs):
         text = " ".join(str(arg) for arg in args) + "\n"
@@ -84,7 +89,7 @@ class WebEditorServer:
                 print(f"[WebEditor] Request: Load File")
                 self._send_response(conn, self._read_robot_file())
 
-            elif path.startswith("/state"):
+            elif path.startswith("/stateCmd"):
                 try:
                     # Split headers from body
                     _, _, body = request_data.partition('\r\n\r\n')
@@ -103,6 +108,15 @@ class WebEditorServer:
 
             elif path.startswith("/console"):
                 self._send_response(conn, self.console_log[-1000:], "text/plain")
+
+            elif path.startswith("/curState"):
+                retDict = {
+                    "robotName": ROBOT_NAME,
+                    "statusMsg": self.state,
+                    "batVoltage": self._batVoltage,
+                    "codeRunning": True
+                }
+                self._send_response(conn,  json.dumps(retDict), "application/json")
 
             else:
                 self._serve_file(conn, path)

@@ -5,6 +5,12 @@ const disableBtn = document.getElementById('disable');
 const consoleEl = document.getElementById('console');
 const teleopBtn = document.getElementById('teleopBtn');
 const autoBtn = document.getElementById('autoBtn');
+const statRobotNameEl = document.getElementById('status-robot-name');
+const statusBatteryEl = document.getElementById('status-battery');
+const statusCommEl = document.getElementById('status-comm');
+const statusCodeEl = document.getElementById('status-code');
+const statusJoystickEl = document.getElementById('status-joystick');
+const statusMsgEl = document.getElementById('status-message');
 let isChanged = false;
 let isEnabled = false;
 let currentMode = 'disabled';
@@ -51,7 +57,7 @@ function updateEditorLock() {
 
 function sendState() {
     const state = isEnabled ? currentMode : "disabled";
-    fetch('/state', {
+    fetch('/stateCmd', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state })
@@ -119,7 +125,33 @@ function fetchConsoleLog() {
         });
 }
 
-setInterval(fetchConsoleLog, 250);
+setInterval(fetchConsoleLog, 500);
+
+
+// Polling to fetch robot state log data every 1 second
+function fetchRobotState() {
+    fetch('/curState')
+        .then(response => response.json())
+        .then(data => {
+            statRobotNameEl.innerHTML = data.robotName;
+            statusBatteryEl.innerHTML = data.batVoltage.toString() + " V";
+            statusCommEl.innerHTML = "<span class=\"status-check true\">✔</span></td></tr>"
+            statusCodeEl.innerHTML = data.codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
+            statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+            statusMsgEl.innerHTML = data.statusMsg;
+        })
+        .catch(err => {
+            statRobotNameEl.innerHTML = " --- ";
+            statusBatteryEl.innerHTML = " --- V"
+            statusCommEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+            statusCodeEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+            statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+            statusMsgEl.innerHTML = "No Robot <br> Communication";
+        });
+}
+
+setInterval(fetchRobotState, 1000);
+
 
 // Ensure that "tab" in the text area causes a tab character to be inserted instead of moving focus
 document.getElementById('editor').addEventListener('keydown', function (e) {
