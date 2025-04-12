@@ -17,7 +17,11 @@
             <button onclick="document.getElementById('upload').click()">Upload</button>
             <span id="status" class="editor-status">Unchanged</span>
         </div>
-        <textarea id="editor" spellcheck="false"></textarea>
+    
+        <div class="editor-with-highlight">
+            <div class="highlight-layer" id="highlight"></div>
+            <textarea id="editor" spellcheck="false"></textarea>
+        </div>
     </div>
 
     <div class="bottom">
@@ -45,6 +49,7 @@
     </div>
 
     <script src="main.js"></script>
+    <script src="editor.js"></script>
 
 </body>
 

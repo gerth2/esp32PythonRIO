@@ -11,8 +11,9 @@ class WebEditorServer:
         self.state = "disabled"
         self.console_log = ""
         self.max_log_size = 5000
-        self.fileChanged = False
+        self._fileChanged = False
         self._batVoltage = 9.12
+        self._codeRunning = False
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
@@ -21,6 +22,9 @@ class WebEditorServer:
 
     def set_batVoltage(self, voltage):
         self._batVoltage = voltage
+
+    def set_codeRunning(self, running):
+        self._codeRunning = running
 
     def _tee_print(self, *args, **kwargs):
         text = " ".join(str(arg) for arg in args) + "\n"
@@ -47,8 +51,8 @@ class WebEditorServer:
             return ""
         
     def getFileChanged(self):
-        retVal = self.fileChanged 
-        self.fileChanged = False
+        retVal = self._fileChanged 
+        self._fileChanged = False
         return retVal
 
     def _write_robot_file(self, data):
@@ -56,7 +60,7 @@ class WebEditorServer:
             return False
         with open("robot.py", "w") as f:
             f.write(data)
-            self.fileChanged = True
+            self._fileChanged = True
         return True
 
     def _guess_content_type(self, path):
@@ -114,7 +118,7 @@ class WebEditorServer:
                     "robotName": ROBOT_NAME,
                     "statusMsg": self.state,
                     "batVoltage": self._batVoltage,
-                    "codeRunning": True
+                    "codeRunning": self._codeRunning
                 }
                 self._send_response(conn,  json.dumps(retDict), "application/json")
 
