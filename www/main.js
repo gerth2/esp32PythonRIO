@@ -13,14 +13,32 @@ const statusJoystickEl = document.getElementById('status-joystick');
 const statusMsgEl = document.getElementById('status-message');
 let isChanged = false;
 let isEnabled = false;
-let currentMode = 'disabled';
+let currentMode = 'teleop';
+
+function deploy(){
+    fetch('/deploy', { method: 'POST', body: editor.value })
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to deploy robot.py");
+        else {
+            isChanged = false;
+            updateStatus();
+        }
+        return res.text();
+    })
+}
 
 // Deploy, Download, Upload logic
 document.getElementById('deploy').onclick = () => {
-    fetch('/deploy', { method: 'POST', body: editor.value });
-    isChanged = false;
-    updateStatus();
+    deploy()
 };
+
+//Handle ctrl-s as deploy
+editor.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault(); // Prevent the default save action
+        deploy();
+    }
+});
 
 document.getElementById('download').onclick = () => {
     const blob = new Blob([editor.value], { type: 'text/plain' });
@@ -35,6 +53,7 @@ document.getElementById('upload').onchange = (e) => {
     if (file) {
         file.text().then(text => {
             editor.value = text;
+            updateHighlight();
             isChanged = true;
             updateStatus();
         });
@@ -104,6 +123,7 @@ fetch('/robot.py')
     })
     .then(text => {
         editor.value = text;
+        updateHighlight();
         isChanged = false;
         updateStatus();
     })

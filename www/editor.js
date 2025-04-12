@@ -1,12 +1,12 @@
 const highlight = document.getElementById('highlight');
 
 
-// Ensure that "tab" in the text area causes a tab character to be inserted instead of moving focus
+// on any change to the text of editor
 editor.addEventListener('keydown', function (e) {
 
     const textarea = e.target;
 
-    // Code editor style tab handling - indentation
+    // Code editor style tab handling - indentation and unindentation
     if (e.key === 'Tab') {
          // Prevent default tab behavior (moving focus)
          
@@ -50,17 +50,47 @@ editor.addEventListener('keydown', function (e) {
             // Move the cursor position after the inserted tab
             textarea.selectionStart = textarea.selectionEnd = cursorPos + 4;
         }
+
+        updateHighlight();  // Re-sync the highlight overlay
+
     }
 
-    // Get total height and width of textarea in pixels
-    var totalHeight = parseInt(window.getComputedStyle(textarea).getPropertyValue('height'));
-    var totalWidth = parseInt(window.getComputedStyle(textarea).getPropertyValue('width'));
-    // get number of rows and columns in textarea
-    var rows = textarea.rows;
-    var cols = textarea.cols;
+    // Code editor style enter handling (simple auto-indent)
+    // Inject newline, and same number of leading spaces as previous line that has actual text on it
+    // Or, if the previous line's last character is a colon, add a tab character (4 spaces) to the new line
+    if (e.key === 'Enter') {
+        // Prevent default enter behavior (inserting a newline)
+        e.preventDefault();
+
+        // Get the current position of the cursor
+        const cursorPos = textarea.selectionStart;
+
+        // Get the text before and after the cursor
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter = textarea.value.substring(cursorPos);
+
+        // Find the last newline character in the text before the cursor
+        const lastNewlineIndex = textBefore.lastIndexOf('\n');
+        const textBeforeLastNewline = textBefore.substring(0, lastNewlineIndex + 1);
+        const textAfterLastNewline = textBefore.substring(lastNewlineIndex + 1);
+
+        // Count leading spaces on the line after the last newline
+        var numLeadingSpaces = textAfterLastNewline.match(/^\s*/)[0].length;
+        
+        // If the last character before the newline is a colon, add a tab character (4 spaces) to the new line
+        var extraSpaces = 0;
+        if (textAfterLastNewline.trim().slice(-1) === ':') {
+            extraSpaces = 4;
+        }
+
+        // Insert a newline and leading spaces from the previous line
+        textarea.value = textBefore + '\n' + ' '.repeat(numLeadingSpaces + extraSpaces) + textAfter;
+        textarea.selectionStart = textarea.selectionEnd = cursorPos + numLeadingSpaces + extraSpaces + 1; // Move cursor to end of new line
+
+        updateHighlight();  // Re-sync the highlight overlay
+
+    }
     
-    var curRow = 0;
-    var curCol = 0;
 
 
 });
