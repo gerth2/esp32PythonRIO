@@ -90,7 +90,7 @@ body {
 }
 
 .highlight-layer .keyword {
-    color: green;
+    color: #0366D6;
     font-weight: bold;
 }
 
@@ -100,30 +100,30 @@ body {
 }
 
 .highlight-layer .operator {
-    color: purple;
+    color: #6F42C1	;
     font-weight: bold;
 }
 
 .highlight-layer .punctuation {
-    color: blue;
+    color: #1B7C83	;
     font-weight: bold;
 }
 
 .highlight-layer .number {
-    color: darkorange;
+    color: #F66A0A;
     font-weight: bold;
 }
 
 .highlight-layer .string {
-    color: darkslateblue;
-    font-weight: bold;
+    color: #2DA44E	;
 }
-
 
 .highlight-layer .comment {
-    color: darkgrey;
-    font-weight: bold;
+    color: #B08800	;
+    font-style: italic;
 }
+
+/* if we need another...#DB61A2	*/
 
 .ds-left,
 .ds-center,

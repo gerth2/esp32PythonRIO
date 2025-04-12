@@ -109,7 +109,7 @@ var keywordRegex = new RegExp("\\b(" + keywords.join("|") + ")\\b", "g");
 
 //regex for all python language components
 var commentRegex = new RegExp(/(#.*)$/gm);
-var stringRegex = new RegExp(/((['"])(?:(?=(\\?))\2.)*?\1)/g); // Matches both single and double quoted strings
+var stringRegex = new RegExp(/((['"])(?:\\.|(?!\2)[^\\\n\r])*(\2)?)/g); // Matches both single and double quoted strings
 var numberRegex = new RegExp(/(\b\d+(\.\d+)?\b)/g); // Matches integers and floats
 var semicolonRegex = new RegExp(/(;)/g); // Matches semicolons
 //match python operators
