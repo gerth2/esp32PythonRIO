@@ -48,10 +48,11 @@ class MPU6050ZGyro:
             print("MPU6050 read error:", e)
             return 0.0
 
-    def calibrate(self, num_samples: int = 100, delay_ms: int = 5):
+    def calibrate(self, num_samples: int = 100, delay_ms: int = 10):
         """Measures and sets the zero offset for Z-axis angular velocity."""
         import time
         total = 0
+        time.sleep_ms(1000)
         for _ in range(num_samples):
             raw = self.read_raw_gyro_z()
             total += raw

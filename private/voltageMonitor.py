@@ -5,7 +5,7 @@ class VoltageMonitor:
         self,
         pin: int = 34,
         r1_ohms: float = 10000.0,     # Top resistor (connected to VIN)
-        r2_ohms: float = 3300.0,      # Bottom resistor (connected to GND)
+        r2_ohms: float = 1000.0,      # Bottom resistor (connected to GND)
         vref: float = 3.3             # ADC reference voltage (ESP32 default)
     ):
         self.r1 = r1_ohms
@@ -17,12 +17,9 @@ class VoltageMonitor:
         self.adc.atten(machine.ADC.ATTN_11DB)    # Full 0–3.3V input range
         self.adc.width(machine.ADC.WIDTH_12BIT)  # 12-bit resolution (0–4095)
 
-    def read_raw(self) -> int:
-        return self.adc.read()
-
     def read_voltage(self) -> float:
-        raw = self.read_raw()
-        adc_voltage = (raw / 4095) * self.vref
+        raw = self.adc.read_uv()
+        adc_voltage = (raw / 1000000.0)  # Convert microvolts to volts
 
         # Reverse the voltage divider:
         vin = adc_voltage * ((self.r1 + self.r2) / self.r2)

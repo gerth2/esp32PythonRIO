@@ -27,7 +27,7 @@ class AS5600Encoder:
             angle_rad = (raw_angle / 4096) * 2 * math.pi
             return angle_rad
         except Exception as e:
-            print("I2C read error:", e)
+            print("AS5600 read error:", e)
             return self.last_angle  # fallback to last known angle
 
     def get_velocity(self) -> float:

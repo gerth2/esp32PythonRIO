@@ -1,10 +1,12 @@
+import random
+import time
 import usocket as socket
 import uos
 import builtins
 import sys, json
 from robotName import ROBOT_NAME
 
-class WebEditorServer:
+class WebInterfaceServer:
     def __init__(self, port=8080):
         self.port = port
         self.locked = False
@@ -121,6 +123,15 @@ class WebEditorServer:
                     "codeRunning": self._codeRunning
                 }
                 self._send_response(conn,  json.dumps(retDict), "application/json")
+
+            elif path.startswith("/getData"):
+                retSamples = [{
+                    "TIME": time.ticks_ms()/1000.0,
+                    "random": random.random(),
+                    "batVoltage": self._batVoltage,
+                    "codeRunning": self._codeRunning,
+                }]
+                self._send_response(conn,  json.dumps(retSamples), "application/json")
 
             else:
                 self._serve_file(conn, path)

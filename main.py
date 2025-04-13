@@ -1,9 +1,8 @@
-from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, TR_MODE_TEST, MainStateMachine
+from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, MainStateMachine
 import sys, time
-from robot import MyRobot
 from private.Hardware import Hardware
 from private.RobotSignalLight import RobotSignalLight
-from private.webEditor import WebEditorServer
+from private.webInterface import WebInterfaceServer
 from robotName import ROBOT_NAME
 import machine
 import network
@@ -29,13 +28,13 @@ def startUserCode():
         codeRunning = False
 
 def updateUserCode():
-    global rsm, codeRunning, editor
+    global rsm, codeRunning, webInf
     if(rsm is not None):
-        if editor.state == "disabled" or not codeRunning:
+        if webInf.state == "disabled" or not codeRunning:
             rsm.set_mode(TR_MODE_DISABLED)
-        elif editor.state == "teleop":
+        elif webInf.state == "teleop":
             rsm.set_mode(TR_MODE_TELEOP)
-        elif editor.state == "auto":
+        elif webInf.state == "auto":
             rsm.set_mode(TR_MODE_AUTONOMOUS)
         else:
             rsm.set_mode(TR_MODE_DISABLED)
@@ -59,24 +58,27 @@ ap.active(True)                       # activate the interface
 
 try:
     rsl = RobotSignalLight()
-    editor = WebEditorServer()
+    webInf = WebInterfaceServer()
     hw = Hardware()
     startUserCode()
 
     while True:
         startTimeUs = time.ticks_us()
 
-        editor.set_batVoltage(hw.vMon.read_voltage())
-        editor.set_codeRunning(codeRunning)
-        editor.update()  # handle web requests
+        hw.update()  # update hardware state
+
+        webInf.set_batVoltage(hw.vMon.read_voltage())
+        webInf.set_codeRunning(codeRunning)
+        webInf.update()  # handle web requests
 
         # Reload robot.py if needed
-        if editor.getFileChanged():
+        if webInf.getFileChanged():
             startUserCode()
+
 
         updateUserCode()  # update the user's robot code
 
-        rsl.set_enabled(editor.state != "disabled" and codeRunning)
+        rsl.set_enabled(webInf.state != "disabled" and codeRunning)
         rsl.update(time.ticks_ms())
 
         procTimeUs = time.ticks_us() - startTimeUs
