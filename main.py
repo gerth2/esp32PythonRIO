@@ -50,11 +50,13 @@ def updateUserCode():
 
 # Init WiFi
 ap = network.WLAN(network.WLAN.IF_AP) # create access-point interface
+#ap.config(pm = 0xa11140)  # disables power save mode
 ap.config(ssid=f'ESP-1736-{ROBOT_NAME}')      # set the SSID of the access point
 ap.config(max_clients=2)              # set how many clients can connect to the network
-ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0"))
+ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0")) 
 ap.ipconfig(gw4="10.17.36.1")
 ap.active(True)                       # activate the interface
+
 
 try:
     rsl = RobotSignalLight()
@@ -67,28 +69,35 @@ try:
 
         webInf.set_batVoltage(hw.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
-        webInf.update()  # handle web requests
 
-        # TEMP TESTING ONLY
-        if(webInf.keyStates == 0x01):
-            hw.setLeftMotorVoltage(3.0)
-            hw.setRightMotorVoltage(0.0)
-        elif(webInf.keyStates == 0x04):
-            hw.setLeftMotorVoltage(-3.0)
-            hw.setRightMotorVoltage(0.0)
-        elif(webInf.keyStates == 0x02):
+
+        
+        if(webInf.state == "disabled"):
+            # Motor Safeties - disable
             hw.setLeftMotorVoltage(0.0)
-            hw.setRightMotorVoltage(3.0)
-        elif(webInf.keyStates == 0x08):
-            hw.setLeftMotorVoltage(0.0)
-            hw.setRightMotorVoltage(-3.0)
+            hw.setRightMotorVoltage(0.0)
+            # TODO - other motors
         else:
-            hw.setLeftMotorVoltage(0.0)
-            hw.setRightMotorVoltage(0.0)
+            #########################################
+            # TEMP TESTING ONLY
+            if(webInf.keyStates == 0x01):
+                hw.setLeftMotorVoltage(3.0)
+                hw.setRightMotorVoltage(0.0)
+            elif(webInf.keyStates == 0x04):
+                hw.setLeftMotorVoltage(-3.0)
+                hw.setRightMotorVoltage(0.0)
+            elif(webInf.keyStates == 0x02):
+                hw.setLeftMotorVoltage(0.0)
+                hw.setRightMotorVoltage(3.0)
+            elif(webInf.keyStates == 0x08):
+                hw.setLeftMotorVoltage(0.0)
+                hw.setRightMotorVoltage(-3.0)
+            else:
+                hw.setLeftMotorVoltage(0.0)
+                hw.setRightMotorVoltage(0.0)
+            #########################################   
 
         hw.update()  # update hardware state
-
-
 
         # Reload robot.py if needed
         if webInf.getFileChanged():

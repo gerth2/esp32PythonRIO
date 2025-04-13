@@ -145,7 +145,7 @@ function fetchConsoleLog() {
         });
 }
 
-setInterval(fetchConsoleLog, 500);
+//setInterval(fetchConsoleLog, 500);
 
 
 // Polling to fetch robot state log data every 1 second
@@ -171,3 +171,22 @@ function fetchRobotState() {
 }
 
 setInterval(fetchRobotState, 1000);
+
+const ws = new WebSocket("ws://10.17.36.2:8266");
+
+ws.onopen = function () {
+    console.log("Connected to ESP32 WebSocket server");
+    //setInterval(sendWsDataPeriodic, 100);
+};
+
+ws.onmessage = function (event) {
+    console.log("Received from ESP32:", event.data);
+};
+
+ws.onerror = function (error) {
+    console.error("WebSocket error:", error);
+};
+
+ws.onclose = function () {
+    console.log("WebSocket connection closed");
+};

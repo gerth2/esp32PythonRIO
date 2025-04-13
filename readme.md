@@ -19,6 +19,7 @@ And cuz Chris just wanted to try it.
 * verify periodic timing
 * design PCB
 * write docs
+* Update imaging script to request/assign robot name.
 
 
 # Docs

@@ -37,6 +37,7 @@ class DualMotorDriver:
 
     def set_left_speed(self, speed: float):
         """Set speed for left motor (-1.0 to 1.0)."""
+        #print(f"Set Left speed to {speed}")
         self._set_motor(self.left_pwm1, self.left_pwm2, speed)
 
     def set_right_speed(self, speed: float):

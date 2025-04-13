@@ -39,13 +39,10 @@ function updateKeyState(key, isDown) {
             keyboardData: keyState
         };
 
-        fetch('/controllerInfo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        ws.send(JSON.stringify({
+            keyboardData: keyState
+        }));
+
         console.log("Sent new state" + keyState);
         prevKeyState = keyState;
     }

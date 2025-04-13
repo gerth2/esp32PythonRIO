@@ -1,5 +1,7 @@
 import random
 import time
+import _thread
+from private.wss import start_ws_server
 import usocket as socket
 import uos
 import builtins
@@ -22,6 +24,16 @@ class WebInterfaceServer:
         builtins.print = self._tee_print  # Override print
 
         self._start_server()
+        _thread.start_new_thread(self._server_loop, ())
+
+        # Start a websockets server too in the background
+        _thread.start_new_thread(start_ws_server, (8266, self.onWsData))
+
+
+    def onWsData(self, data):
+        print(f"[WebEditor] Received WebSocket data: {data}")
+        if "keyboardData" in data:
+            self.keyStates = data["keyboardData"]
 
     def set_batVoltage(self, voltage):
         self._batVoltage = voltage
@@ -116,21 +128,6 @@ class WebInterfaceServer:
             elif path.startswith("/console"):
                 self._send_response(conn, self.console_log[-1000:], "text/plain")
 
-            elif path.startswith("/controllerInfo"):
-                try:
-                    # Split headers from body
-                    _, _, body = request_data.partition('\r\n\r\n')
-
-                    # Parse JSON body
-                    data = json.loads(body)
-                    print(f"[WebEditor] Received keyboard data: {data}")
-                    self.keyStates = data['keyboardData']                    
-                    self._send_response(conn, "OK")
-
-                except:
-                    print("[WebEditor] Failed to decode JSON in /controllerInfo")
-                    self._send_response(conn, "Error: Invalid JSON", status="400 BAD")
-
             elif path.startswith("/curState"):
                 retDict = {
                     "robotName": ROBOT_NAME,
@@ -186,11 +183,11 @@ class WebInterfaceServer:
         if isinstance(content, str):
             conn.send(content)
 
-    def update(self):
-        try:
-            conn, _ = self.sock.accept()
-        except OSError:
-            return # No connection ready, that's fine
-            
-        
-        self._handle_client(conn)
+    def _server_loop(self):
+        while True:
+            try:
+                conn, _ = self.sock.accept()
+            except OSError:
+                continue # No connection ready, that's fine  
+
+            self._handle_client(conn)
