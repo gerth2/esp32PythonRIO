@@ -23,7 +23,7 @@ class MPU6050ZGyro:
             print("MPU6050 init error:", e)
 
 
-    def read_raw_gyro_z(self) -> int:
+    def read_raw_gyro_z(self) :
         """Returns the raw 16-bit signed gyroscope Z value"""
         data = self.i2c.readfrom_mem(self.MPU6050_ADDR, self.GYRO_ZOUT_H, 2)
         raw = (data[0] << 8) | data[1]
@@ -31,7 +31,7 @@ class MPU6050ZGyro:
             raw -= 0x10000
         return raw
 
-    def read_gyro_z(self) -> float:
+    def read_gyro_z(self) :
         """Returns Z-axis angular velocity in radians per second (offset not applied)"""
         try:
             raw = self.read_raw_gyro_z()
@@ -73,7 +73,7 @@ class MPU6050ZGyro:
             print("MPU6050 update error:", e)
         #print(f"Gyro Update: {(time.ticks_us() - s)/1000.0}ms")
 
-    def get_angle(self) -> float:
+    def get_angle(self) :
         """Returns the current accumulated angle in degrees."""
         return self.angle
 

@@ -19,7 +19,7 @@ class AS5600Encoder:
     def _ticks_diff(self, new, old):
         return ticks_diff(new, old)
 
-    def read_position(self) -> float:
+    def read_position(self) :
         """Reads the raw angle from the AS5600 and returns it in radians."""
         try:
             data = self.i2c.readfrom_mem(self.AS5600_ADDR, self.RAW_ANGLE_REGISTER, 2)
@@ -30,7 +30,7 @@ class AS5600Encoder:
             print("AS5600 read error:", e)
             return self.last_angle  # fallback to last known angle
 
-    def get_velocity(self) -> float:
+    def get_velocity(self) :
         """Returns the angular velocity in radians per second."""
         current_time = self._now()
         current_angle = self.read_position()

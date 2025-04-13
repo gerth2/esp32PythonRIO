@@ -108,6 +108,7 @@ try:
         rsl.update(time.ticks_ms())
 
         procTimeUs = float(time.ticks_us() - startTimeUs)
+        #print(f"Proc Time: {procTimeUs/1000.0}ms")
         if(procTimeUs < 20*1000.0):
             time.sleep_us(int(20*1000.0 - procTimeUs))  # 20ms loop time
         else:
