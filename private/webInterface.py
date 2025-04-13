@@ -16,6 +16,7 @@ class WebInterfaceServer:
         self._fileChanged = False
         self._batVoltage = 9.12
         self._codeRunning = False
+        self.keyStates = 0x00
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
@@ -114,6 +115,21 @@ class WebInterfaceServer:
 
             elif path.startswith("/console"):
                 self._send_response(conn, self.console_log[-1000:], "text/plain")
+
+            elif path.startswith("/controllerInfo"):
+                try:
+                    # Split headers from body
+                    _, _, body = request_data.partition('\r\n\r\n')
+
+                    # Parse JSON body
+                    data = json.loads(body)
+                    print(f"[WebEditor] Received keyboard data: {data}")
+                    self.keyStates = data['keyboardData']                    
+                    self._send_response(conn, "OK")
+
+                except:
+                    print("[WebEditor] Failed to decode JSON in /controllerInfo")
+                    self._send_response(conn, "Error: Invalid JSON", status="400 BAD")
 
             elif path.startswith("/curState"):
                 retDict = {

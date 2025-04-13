@@ -65,11 +65,29 @@ try:
     while True:
         startTimeUs = time.ticks_us()
 
-        hw.update()  # update hardware state
-
         webInf.set_batVoltage(hw.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
         webInf.update()  # handle web requests
+
+        # TEMP TESTING ONLY
+        if(webInf.keyStates == 0x01):
+            hw.setLeftMotorVoltage(3.0)
+            hw.setRightMotorVoltage(0.0)
+        elif(webInf.keyStates == 0x04):
+            hw.setLeftMotorVoltage(-3.0)
+            hw.setRightMotorVoltage(0.0)
+        elif(webInf.keyStates == 0x02):
+            hw.setLeftMotorVoltage(0.0)
+            hw.setRightMotorVoltage(3.0)
+        elif(webInf.keyStates == 0x08):
+            hw.setLeftMotorVoltage(0.0)
+            hw.setRightMotorVoltage(-3.0)
+        else:
+            hw.setLeftMotorVoltage(0.0)
+            hw.setRightMotorVoltage(0.0)
+
+        hw.update()  # update hardware state
+
 
         # Reload robot.py if needed
         if webInf.getFileChanged():

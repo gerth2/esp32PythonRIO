@@ -12,13 +12,13 @@ I2C_BUS_B_SCL = 18
 I2C_BUS_B_SDA = 19
 I2C_BUS_B_FREQ = 400_000
 
-LEFT_MOTOR_PIN_1 = 32
-LEFT_MOTOR_PIN_2 = 26
+LEFT_MOTOR_PIN_1 = 26
+LEFT_MOTOR_PIN_2 = 32
+
+RIGHT_MOTOR_PIN_1 = 33
+RIGHT_MOTOR_PIN_2 = 25
 
 VMON_PIN = 34
-
-RIGHT_MOTOR_PIN_1 = 25
-RIGHT_MOTOR_PIN_2 = 33
 
 class Hardware:
     def __init__(self):
@@ -30,6 +30,7 @@ class Hardware:
         self.gyro = MPU6050ZGyro(self.i2cBusA)
         self.motors = DualMotorDriver(LEFT_MOTOR_PIN_1, LEFT_MOTOR_PIN_2, RIGHT_MOTOR_PIN_1, RIGHT_MOTOR_PIN_2)
         self.vMon = VoltageMonitor(pin=VMON_PIN)
+        self.vbat = 5.0
 
         self.heading = 0.0
 
@@ -41,6 +42,16 @@ class Hardware:
         #self.renc = self.rightEnc.read_position()
         self.gyro.update()
         self.headingDeg = self.gyro.get_angle()
-        #print(self.headingDeg)
-        self.motors.set_left_speed(0.0)
-        self.motors.set_right_speed(0.0)
+        self.vbat = self.vMon.read_voltage()
+
+    def _voltToMotorCmd(self, volts):
+        cmd = volts / self.vbat
+        cmd = max(-1.0, cmd)
+        cmd = min(1.0, cmd)
+        return cmd
+
+    def setLeftMotorVoltage(self, volts):
+        self.motors.set_left_speed(self._voltToMotorCmd(volts))
+
+    def setRightMotorVoltage(self, volts):
+        self.motors.set_right_speed(self._voltToMotorCmd(volts))
