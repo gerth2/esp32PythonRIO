@@ -70,7 +70,6 @@ try:
         webInf.set_batVoltage(hw.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
 
-
         
         if(webInf.state == "disabled"):
             # Motor Safeties - disable

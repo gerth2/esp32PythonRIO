@@ -14,6 +14,7 @@ const statusMsgEl = document.getElementById('status-message');
 let isChanged = false;
 let isEnabled = false;
 let currentMode = 'teleop';
+let isConnected = false;
 
 function deploy(){
     fetch('/deploy', { method: 'POST', body: editor.value })
@@ -76,11 +77,9 @@ function updateEditorLock() {
 
 function sendState() {
     const state = isEnabled ? currentMode : "disabled";
-    fetch('/stateCmd', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state })
-    });
+    ws.send(JSON.stringify({
+        stateCmd: state
+    }));
 }
 
 enableBtn.onclick = () => {
@@ -132,61 +131,59 @@ fetch('/robot.py')
         status.textContent = 'Error loading file';
     });
 
-// Polling to fetch console log data every 1 second
-function fetchConsoleLog() {
-    fetch('/console')
-        .then(response => response.text())
-        .then(data => {
-            consoleEl.textContent = data;
-            consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
-        })
-        .catch(err => {
-            console.error('Error fetching console log:', err);
-        });
+function updateDisplayedRobotState(robotName, batVoltage, codeRunning, statusMsg){
+    if(isConnected){
+        statRobotNameEl.innerHTML = data.robotName;
+        statusBatteryEl.innerHTML = data.batVoltage.toString() + " V";
+        statusCommEl.innerHTML = "<span class=\"status-check true\">✔</span></td></tr>"
+        statusCodeEl.innerHTML = data.codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusMsgEl.innerHTML = data.statusMsg;
+    } else {
+        statRobotNameEl.innerHTML = " --- ";
+        statusBatteryEl.innerHTML = " --- V"
+        statusCommEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusCodeEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusMsgEl.innerHTML = "No Robot <br> Communication";
+    }
 }
-
-//setInterval(fetchConsoleLog, 500);
-
-
-// Polling to fetch robot state log data every 1 second
-function fetchRobotState() {
-    fetch('/curState')
-        .then(response => response.json())
-        .then(data => {
-            statRobotNameEl.innerHTML = data.robotName;
-            statusBatteryEl.innerHTML = data.batVoltage.toString() + " V";
-            statusCommEl.innerHTML = "<span class=\"status-check true\">✔</span></td></tr>"
-            statusCodeEl.innerHTML = data.codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
-            statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
-            statusMsgEl.innerHTML = data.statusMsg;
-        })
-        .catch(err => {
-            statRobotNameEl.innerHTML = " --- ";
-            statusBatteryEl.innerHTML = " --- V"
-            statusCommEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
-            statusCodeEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
-            statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
-            statusMsgEl.innerHTML = "No Robot <br> Communication";
-        });
-}
-
-setInterval(fetchRobotState, 1000);
 
 const ws = new WebSocket("ws://10.17.36.2:8266");
 
 ws.onopen = function () {
     console.log("Connected to ESP32 WebSocket server");
-    //setInterval(sendWsDataPeriodic, 100);
+    isConnected = true;
 };
 
 ws.onmessage = function (event) {
     console.log("Received from ESP32:", event.data);
+
+    jsonData = JSON.parse(event.data); 
+
+    if(jsonData.hasOwnProperty("consoleOutput")){
+        consoleEl.textContent += jsonData.consoleOutput;
+        consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
+    }
+
+    if(jsonData.hasOwnProperty("robotState")){
+        data = jsonData.robotState;
+        updateDisplayedRobotState(data.robotName, data.batVoltage, data.codeRunning, data.statusMsg);
+    }
+
+
+
 };
 
 ws.onerror = function (error) {
     console.error("WebSocket error:", error);
+    isConnected = false;
+    updateDisplayedRobotState(" --- ", " --- ", false, "No Robot <br> Communication");
+    //TODO reopen websocket
 };
 
 ws.onclose = function () {
     console.log("WebSocket connection closed");
+    isConnected = false;
+    updateDisplayedRobotState(" --- ", " --- ", false, "No Robot <br> Communication");
 };

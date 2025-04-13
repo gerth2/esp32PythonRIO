@@ -1,11 +1,10 @@
-import random
 import time
 import _thread
-from private.wss import start_ws_server
+from private.wss import send_ws_json, start_ws_server
 import usocket as socket
 import uos
 import builtins
-import sys, json
+import json
 from robotName import ROBOT_NAME
 
 class WebInterfaceServer:
@@ -27,13 +26,53 @@ class WebInterfaceServer:
         _thread.start_new_thread(self._server_loop, ())
 
         # Start a websockets server too in the background
-        _thread.start_new_thread(start_ws_server, (8266, self.onWsData))
+        _thread.start_new_thread(start_ws_server, (8266, self.onWsData, self.onWsDisconnect))
+
+        # Periodic data send for websockets
+        _thread.start_new_thread(self.wsSendLoop, ())
+
+    def _getStatusMessage(self):
+        if self.state == "disabled":
+            return "Disabled"
+        elif self.state == "teleop":
+            return "Teleop Enabled"
+        elif self.state == "auto":
+            return "Autonomous Enabled"
+
+    def wsSendLoop(self):
+        while True:
+            sendJson = {
+                "robotState": {
+                    "robotName": ROBOT_NAME,
+                    "batVoltage": self._batVoltage,
+                    "codeRunning": self._codeRunning,
+                    "keyStates": self.keyStates,
+                    "statusMsg": self._getStatusMessage()
+                }
+            }
+
+            if(len(self.console_log) > 0):
+                sendJson["consoleOutput"]  = self.console_log
+                self.console_log = "" #reset
+
+            send_ws_json(sendJson)
+
+            time.sleep_ms(300)
+
+
+    def onWsDisconnect(self):
+        # Safety - go to disabled with no input command on client disconnect
+        self.state = "disabled"
+        self.keyStates = 0x00
 
 
     def onWsData(self, data):
-        print(f"[WebEditor] Received WebSocket data: {data}")
+        # Switchyard for any incoming websocket data from the server
         if "keyboardData" in data:
             self.keyStates = data["keyboardData"]
+
+        if "stateCmd" in data:
+            self.state = data["stateCmd"]
 
     def set_batVoltage(self, voltage):
         self._batVoltage = voltage
@@ -87,12 +126,7 @@ class WebInterfaceServer:
     def _handle_client(self, conn):
         try:
             request = conn.recv(1024).decode()
-            method, path, request_data = request.split(" ", 2)
-
-            #print(f"[WebEditor] Request method: {method}")
-            #print(f"[WebEditor] Request path: {path}")
-            #print(f"[WebEditor] Request data: {request_data}")
-
+            method, path, _ = request.split(" ", 2)
 
             if path == "/":
                 print(f"[WebEditor] Request: Serve Main UI")
@@ -107,44 +141,6 @@ class WebInterfaceServer:
             elif path.startswith("/robot.py"):
                 print(f"[WebEditor] Request: Load File")
                 self._send_response(conn, self._read_robot_file())
-
-            elif path.startswith("/stateCmd"):
-                try:
-                    # Split headers from body
-                    _, _, body = request_data.partition('\r\n\r\n')
-
-                    # Parse JSON body
-                    data = json.loads(body)
-                    print(f"[WebEditor] Received state data: {data}")
-                    self.state = data['state']
-                    print(f"[WebEditor] Robot State is now {self.state}")
-                    
-                    self._send_response(conn, "OK")
-
-                except:
-                    print("[WebEditor] Failed to decode JSON in /state")
-                    self._send_response(conn, "Error: Invalid JSON", status="400 BAD")
-
-            elif path.startswith("/console"):
-                self._send_response(conn, self.console_log[-1000:], "text/plain")
-
-            elif path.startswith("/curState"):
-                retDict = {
-                    "robotName": ROBOT_NAME,
-                    "statusMsg": self.state,
-                    "batVoltage": self._batVoltage,
-                    "codeRunning": self._codeRunning
-                }
-                self._send_response(conn,  json.dumps(retDict), "application/json")
-
-            elif path.startswith("/getData"):
-                retSamples = [{
-                    "TIME": time.ticks_ms()/1000.0,
-                    "random": random.random(),
-                    "batVoltage": self._batVoltage,
-                    "codeRunning": self._codeRunning,
-                }]
-                self._send_response(conn,  json.dumps(retSamples), "application/json")
 
             else:
                 self._serve_file(conn, path)

@@ -3,6 +3,9 @@ import usocket as socket
 import ustruct
 import ubinascii
 import ujson as json
+import time
+
+curWsClient = None
 
 def websocket_handshake(client):
     req = client.recv(1024)
@@ -48,8 +51,32 @@ def recv_ws_json(client):
     except Exception as e:
         print("[WSS] JSON decode failed:", e)
         return None
+    
+def send_ws_json(obj):
+    if(curWsClient is None):
+        return # no client, nothin to send
+    
+    # We have a client, send actual data
+    try:
+        data = json.dumps(obj)
+        payload = data.encode('utf-8')
+        length = len(payload)
 
-def start_ws_server(port=8266, callback=None):
+        # Build header
+        if length <= 125:
+            header = bytes([0x81, length])
+        elif length <= 65535:
+            header = bytes([0x81, 126]) + ustruct.pack('>H', length)
+        else:
+            header = bytes([0x81, 127]) + ustruct.pack('>Q', length)
+
+        curWsClient.send(header + payload)
+    except Exception as e:
+        print("[WSS] Failed to send JSON:", e)
+
+
+def start_ws_server(port=8266, onDataCallback=None, onDisconnectCallback=None):
+    global curWsClient
     s = socket.socket()
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(('0.0.0.0', port))
@@ -63,17 +90,21 @@ def start_ws_server(port=8266, callback=None):
             websocket_handshake(client)
 
             while True:
+                curWsClient = client
                 obj = recv_ws_json(client)
                 if obj is None:
                     break
-                if callback:
-                    callback(obj)
+                if onDataCallback:
+                    onDataCallback(obj)
 
         except Exception as e:
             print("[WSS] Client error or disconnect:", e)
 
         try:
+            curWsClient = None
             client.close()
         except:
             pass
         print("[WSS] Client disconnected")
+        if onDisconnectCallback:
+            onDisconnectCallback()
