@@ -1,3 +1,4 @@
+import time
 from machine import Pin, I2C
 from private.AS5600Encoder import AS5600Encoder
 from private.DualMotorControl import DualMotorDriver

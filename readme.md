@@ -1,8 +1,8 @@
 # Why
 
-. "Mom Can we have XRP?"
-. "No, we have XRP at home."
-. at home...
+* "Mom Can we have XRP?"
+* "No, we have XRP at home."
+* at home...
 
 Economical robot platform that emulates the "look and feel" of frc programming as best as possible.
 
@@ -11,11 +11,12 @@ And cuz Chris just wanted to try it.
 # TODO
 
 * read in joystick data
-* add gyro support
-* add motor output support
+* Design wpilib class replicas
+* Improve UI clarity on which mode you are in
+* Test wheel rotation sensors
+* debug dataplotter
+* Add reset-source-code logic
 * verify periodic timing
-* robot mode state machine
-* robot signal light
 * design PCB
 * write docs
 

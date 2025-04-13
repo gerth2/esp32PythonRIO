@@ -189,6 +189,8 @@ class WebInterfaceServer:
     def update(self):
         try:
             conn, _ = self.sock.accept()
-            self._handle_client(conn)
         except OSError:
-            pass  # No connection ready, that's fine
+            return # No connection ready, that's fine
+            
+        
+        self._handle_client(conn)

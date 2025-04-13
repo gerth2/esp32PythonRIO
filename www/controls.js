@@ -46,6 +46,7 @@ function updateKeyState(key, isDown) {
             },
             body: JSON.stringify(payload)
         });
+        console.log("Sent new state" + keyState);
         prevKeyState = keyState;
     }
 

@@ -89,18 +89,22 @@ try:
         hw.update()  # update hardware state
 
 
+
         # Reload robot.py if needed
         if webInf.getFileChanged():
             startUserCode()
-
 
         updateUserCode()  # update the user's robot code
 
         rsl.set_enabled(webInf.state != "disabled" and codeRunning)
         rsl.update(time.ticks_ms())
 
-        procTimeUs = time.ticks_us() - startTimeUs
-        time.sleep_us(20*1000 - procTimeUs)  # 20ms loop time
+        procTimeUs = float(time.ticks_us() - startTimeUs)
+        if(procTimeUs < 20*1000.0):
+            time.sleep_us(int(20*1000.0 - procTimeUs))  # 20ms loop time
+        else:
+            print(f"Warning! Loop Overrun: ProcTime: {procTimeUs/1000.0}ms")
+
 
 except Exception as e:
     print(">>>>>>>>>>>>>>> BASE ROBOT CODE CRASHED! <<<<<<<<<<<<<<")

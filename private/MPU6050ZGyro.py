@@ -2,6 +2,7 @@
 # from machine import I2C
 # from time import ticks_ms, ticks_diff
 import math
+import time
 
 class MPU6050ZGyro:
     MPU6050_ADDR = 0x68
@@ -13,7 +14,7 @@ class MPU6050ZGyro:
         self.i2c = i2c
         self.offset = 0.0  # degrees/sec
         self.angle = 0.0   # accumulated angle in degrees
-        self.last_time = self._now()
+        self.last_time = time.ticks_us()/1000.0
 
         # Wake up the MPU6050
         try:
@@ -21,13 +22,6 @@ class MPU6050ZGyro:
         except Exception as e:
             print("MPU6050 init error:", e)
 
-    def _now(self):
-        from time import ticks_ms
-        return ticks_ms()
-
-    def _ticks_diff(self, new, old):
-        from time import ticks_diff
-        return ticks_diff(new, old)
 
     def read_raw_gyro_z(self) -> int:
         """Returns the raw 16-bit signed gyroscope Z value"""
@@ -50,7 +44,6 @@ class MPU6050ZGyro:
 
     def calibrate(self, num_samples: int = 100, delay_ms: int = 10):
         """Measures and sets the zero offset for Z-axis angular velocity."""
-        import time
         total = 0
         time.sleep_ms(1000)
         for _ in range(num_samples):
@@ -63,9 +56,10 @@ class MPU6050ZGyro:
         print("Calibration complete. Offset: {:.3f} deg/s".format(self.offset))
 
     def update(self):
+        #s = time.ticks_us()
         """Integrates angular velocity over time to update accumulated angle in degrees."""
-        current_time = self._now()
-        dt_ms = self._ticks_diff(current_time, self.last_time)
+        current_time = time.ticks_us()/1000.0
+        dt_ms = time.ticks_diff(current_time, self.last_time)
         dt = dt_ms / 1000  # seconds
 
         try:
@@ -77,13 +71,13 @@ class MPU6050ZGyro:
             self.last_time = current_time
         except Exception as e:
             print("MPU6050 update error:", e)
+        #print(f"Gyro Update: {(time.ticks_us() - s)/1000.0}ms")
 
     def get_angle(self) -> float:
         """Returns the current accumulated angle in degrees."""
-        self.update()
         return self.angle
 
     def reset(self):
         """Resets the integrated angle to zero."""
         self.angle = 0.0
-        self.last_time = self._now()
+        self.last_time = time.ticks_us()/1000.0
