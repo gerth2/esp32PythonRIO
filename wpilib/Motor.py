@@ -2,14 +2,14 @@ class Motor():
     """
     Common base class for all PWM Motor Controllers.
     """
-    def __init__(self, name: str, channel) :
+    def __init__(self, channel) :
         """
         Constructor for a PWM Motor %Controller connected via PWM.
         
-        :param name:    Name to use for SendableRegistry
         :param channel: The PWM channel that the controller is attached to. 
                         TBD These on our robot
         """
+        print(f"Memes {channel}")
         pass
     
     def disable(self) :

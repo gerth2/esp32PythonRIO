@@ -1,4 +1,5 @@
-from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, MainStateMachine
+from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, 
+from wpilib import *
 import sys, time
 from _private.HAL import HardwareAbstractionLayer
 from _private.RobotSignalLight import RobotSignalLight

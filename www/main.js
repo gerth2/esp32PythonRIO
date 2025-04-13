@@ -133,12 +133,12 @@ fetch('/robot.py')
 
 function updateDisplayedRobotState(robotName, batVoltage, codeRunning, statusMsg){
     if(isConnected){
-        statRobotNameEl.innerHTML = data.robotName;
-        statusBatteryEl.innerHTML = data.batVoltage.toString() + " V";
+        statRobotNameEl.innerHTML = robotName;
+        statusBatteryEl.innerHTML = batVoltage.toString() + " V";
         statusCommEl.innerHTML = "<span class=\"status-check true\">✔</span></td></tr>"
-        statusCodeEl.innerHTML = data.codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
+        statusCodeEl.innerHTML = codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
         statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
-        statusMsgEl.innerHTML = data.statusMsg;
+        statusMsgEl.innerHTML = statusMsg;
     } else {
         statRobotNameEl.innerHTML = " --- ";
         statusBatteryEl.innerHTML = " --- V"
@@ -149,41 +149,57 @@ function updateDisplayedRobotState(robotName, batVoltage, codeRunning, statusMsg
     }
 }
 
-const ws = new WebSocket("ws://10.17.36.2:8266");
+// global websocket object
+let ws;
 
-ws.onopen = function () {
-    console.log("Connected to ESP32 WebSocket server");
-    isConnected = true;
-};
+function connectWebSocket() {
+    ws = new WebSocket("ws://10.17.36.2:8266");
 
-ws.onmessage = function (event) {
-    console.log("Received from ESP32:", event.data);
+    ws.onopen = function () {
+        console.log("Connected to ESP32 WebSocket server");
+        isConnected = true;
+    };
 
-    jsonData = JSON.parse(event.data); 
+    ws.onmessage = function (event) {
+        console.log("Received from ESP32:", event.data);
 
-    if(jsonData.hasOwnProperty("consoleOutput")){
-        consoleEl.textContent += jsonData.consoleOutput;
-        consoleEl.scrollTop = consoleEl.scrollHeight; // Scroll to the bottom
-    }
+        let jsonData;
+        try {
+            jsonData = JSON.parse(event.data);
+        } catch (e) {
+            console.error("Failed to parse JSON:", e);
+            return;
+        }
 
-    if(jsonData.hasOwnProperty("robotState")){
-        data = jsonData.robotState;
-        updateDisplayedRobotState(data.robotName, data.batVoltage, data.codeRunning, data.statusMsg);
-    }
+        if (jsonData.hasOwnProperty("consoleOutput")) {
+            consoleEl.textContent += jsonData.consoleOutput;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
 
+        if (jsonData.hasOwnProperty("robotState")) {
+            let data = jsonData.robotState;
+            updateDisplayedRobotState(data.robotName, data.batVoltage, data.codeRunning, data.statusMsg);
+        }
+    };
 
+    ws.onerror = function (error) {
+        console.error("WebSocket error:", error);
+        cleanupAndRetry();
+    };
 
-};
+    ws.onclose = function () {
+        console.log("WebSocket connection closed");
+        cleanupAndRetry();
+    };
+}
 
-ws.onerror = function (error) {
-    console.error("WebSocket error:", error);
+function cleanupAndRetry() {
     isConnected = false;
     updateDisplayedRobotState(" --- ", " --- ", false, "No Robot <br> Communication");
-    //TODO reopen websocket
-};
 
-ws.onclose = function () {
-    console.log("WebSocket connection closed");
-    isConnected = false;
-    updateDisplayedRobotState(" --- ", " --- ", false, "No Robot <br> Communication");
-};
+    // Wait 0.5 seconds and then reconnect
+    setTimeout(connectWebSocket, 500);
+}
+
+// Start connection initially
+connectWebSocket();
