@@ -1,9 +1,9 @@
 import time
 from machine import Pin, I2C
-from private.AS5600Encoder import AS5600Encoder
-from private.DualMotorControl import DualMotorDriver
-from private.MPU6050ZGyro import MPU6050ZGyro
-from private.voltageMonitor import VoltageMonitor
+from _private.AS5600Encoder import AS5600Encoder
+from _private.DualMotorControl import DualMotorDriver
+from _private.MPU6050ZGyro import MPU6050ZGyro
+from _private.voltageMonitor import VoltageMonitor
 
 I2C_BUS_A_SCL = 23
 I2C_BUS_A_SDA = 22
@@ -21,7 +21,7 @@ RIGHT_MOTOR_PIN_2 = 25
 
 VMON_PIN = 34
 
-class Hardware:
+class HardwareAbstractionLayer:
     def __init__(self):
         self.i2cBusA = I2C(0, scl=Pin(I2C_BUS_A_SCL), sda=Pin(I2C_BUS_A_SDA), freq=I2C_BUS_A_FREQ)
         self.i2cBusB = I2C(1, scl=Pin(I2C_BUS_B_SCL), sda=Pin(I2C_BUS_B_SDA), freq=I2C_BUS_B_FREQ)

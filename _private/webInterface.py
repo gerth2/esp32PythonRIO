@@ -1,6 +1,6 @@
 import time
 import _thread
-from private.wss import send_ws_json, start_ws_server
+from _private.wss import send_ws_json, start_ws_server
 import usocket as socket
 import uos
 import builtins

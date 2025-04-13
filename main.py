@@ -1,8 +1,8 @@
 from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, MainStateMachine
 import sys, time
-from private.Hardware import Hardware
-from private.RobotSignalLight import RobotSignalLight
-from private.webInterface import WebInterfaceServer
+from _private.HAL import HardwareAbstractionLayer
+from _private.RobotSignalLight import RobotSignalLight
+from _private.webInterface import WebInterfaceServer
 from robotName import ROBOT_NAME
 import machine
 import network
@@ -61,42 +61,42 @@ ap.active(True)                       # activate the interface
 try:
     rsl = RobotSignalLight()
     webInf = WebInterfaceServer()
-    hw = Hardware()
+    hal = HardwareAbstractionLayer()
     startUserCode()
 
     while True:
         startTimeUs = time.ticks_us()
 
-        webInf.set_batVoltage(hw.vMon.read_voltage())
+        webInf.set_batVoltage(hal.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
 
         
         if(webInf.state == "disabled"):
             # Motor Safeties - disable
-            hw.setLeftMotorVoltage(0.0)
-            hw.setRightMotorVoltage(0.0)
+            hal.setLeftMotorVoltage(0.0)
+            hal.setRightMotorVoltage(0.0)
             # TODO - other motors
         else:
             #########################################
             # TEMP TESTING ONLY
             if(webInf.keyStates == 0x01):
-                hw.setLeftMotorVoltage(3.0)
-                hw.setRightMotorVoltage(0.0)
+                hal.setLeftMotorVoltage(3.0)
+                hal.setRightMotorVoltage(0.0)
             elif(webInf.keyStates == 0x04):
-                hw.setLeftMotorVoltage(-3.0)
-                hw.setRightMotorVoltage(0.0)
+                hal.setLeftMotorVoltage(-3.0)
+                hal.setRightMotorVoltage(0.0)
             elif(webInf.keyStates == 0x02):
-                hw.setLeftMotorVoltage(0.0)
-                hw.setRightMotorVoltage(3.0)
+                hal.setLeftMotorVoltage(0.0)
+                hal.setRightMotorVoltage(3.0)
             elif(webInf.keyStates == 0x08):
-                hw.setLeftMotorVoltage(0.0)
-                hw.setRightMotorVoltage(-3.0)
+                hal.setLeftMotorVoltage(0.0)
+                hal.setRightMotorVoltage(-3.0)
             else:
-                hw.setLeftMotorVoltage(0.0)
-                hw.setRightMotorVoltage(0.0)
+                hal.setLeftMotorVoltage(0.0)
+                hal.setRightMotorVoltage(0.0)
             #########################################   
 
-        hw.update()  # update hardware state
+        hal.update()  # update hardware state
 
         # Reload robot.py if needed
         if webInf.getFileChanged():
