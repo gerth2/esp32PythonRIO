@@ -60,9 +60,6 @@ class MPU6050ZGyro:
         dt_ms = time.ticks_diff(current_time, self.last_time)
         dt = dt_ms / 1000000.0  # seconds
 
-        if(dt < 0):
-            print("ERRROEROEOROE!!")
-
         self.angle += self.read_gyro_z() * dt
         self.last_time = current_time
 

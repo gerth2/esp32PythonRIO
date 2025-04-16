@@ -1,3 +1,4 @@
+import errno
 import hashlib
 import usocket as socket
 import ustruct
@@ -31,25 +32,31 @@ def websocket_handshake(client):
     client.send(response.encode())
 
 def recv_ws_json(client):
-    hdr = client.recv(2)
-    if not hdr or len(hdr) < 2:
-        return None
-
-    length = hdr[1] & 0x7F
-    if length == 126:
-        length = ustruct.unpack('>H', client.recv(2))[0]
-    elif length == 127:
-        length = ustruct.unpack('>Q', client.recv(8))[0]
-
-    mask = client.recv(4)
-    raw = bytearray(client.recv(length))
-    for i in range(len(raw)):
-        raw[i] ^= mask[i % 4]
-
     try:
-        return json.loads(raw.decode())
-    except Exception as e:
-        print("[WSS] JSON decode failed:", e)
+        hdr = client.recv(2)
+        if not hdr or len(hdr) < 2:
+            return None
+
+        length = hdr[1] & 0x7F
+        if length == 126:
+            length = ustruct.unpack('>H', client.recv(2))[0]
+        elif length == 127:
+            length = ustruct.unpack('>Q', client.recv(8))[0]
+
+        mask = client.recv(4)
+        raw = bytearray(client.recv(length))
+        for i in range(len(raw)):
+            raw[i] ^= mask[i % 4]
+
+        try:
+            return json.loads(raw.decode())
+        except ValueError as e:
+            print("[WSS] JSON decode failed:", str(raw))
+            return None
+    except OSError as e:
+        if e.errno in [errno.ECONNRESET, errno.EPIPE, errno.ETIMEDOUT]:
+            print("[WSS] Client disconnected")
+            raise  # Re-raise the exception to handle it in the main loop
         return None
     
 def send_ws_json(obj):
@@ -86,16 +93,18 @@ def start_ws_server(port=8266, onDataCallback=None, onDisconnectCallback=None):
     while True:
         try:
             client, addr = s.accept()
+            #client.setblocking(False)
+            client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             print("[WSS] Client connected:", addr)
             websocket_handshake(client)
 
             while True:
                 curWsClient = client
                 obj = recv_ws_json(client)
-                if obj is None:
-                    break
-                if onDataCallback:
-                    onDataCallback(obj)
+                if obj is not None:
+                    if onDataCallback:
+                        onDataCallback(obj)
+                time.sleep_ms(2)
 
         except Exception as e:
             print("[WSS] Client error or disconnect:", e)

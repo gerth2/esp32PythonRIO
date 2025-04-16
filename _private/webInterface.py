@@ -39,24 +39,27 @@ class WebInterfaceServer:
         elif self.state == "auto":
             return "Autonomous Enabled"
 
+
+    def _wsSendPeriodic(self):
+        sendJson = {
+            "robotState": {
+                "robotName": ROBOT_NAME,
+                "batVoltage": self._batVoltage,
+                "codeRunning": self._codeRunning,
+                "keyStates": self.keyStates,
+                "statusMsg": self._getStatusMessage()
+            }
+        }
+
+        if(len(self.console_log) > 0):
+            sendJson["consoleOutput"]  = self.console_log
+            self.console_log = "" #reset
+
+        send_ws_json(sendJson)
+
     def wsSendLoop(self):
         while True:
-            sendJson = {
-                "robotState": {
-                    "robotName": ROBOT_NAME,
-                    "batVoltage": self._batVoltage,
-                    "codeRunning": self._codeRunning,
-                    "keyStates": self.keyStates,
-                    "statusMsg": self._getStatusMessage()
-                }
-            }
-
-            if(len(self.console_log) > 0):
-                sendJson["consoleOutput"]  = self.console_log
-                self.console_log = "" #reset
-
-            send_ws_json(sendJson)
-
+            self._wsSendPeriodic()
             time.sleep_ms(300)
 
 
@@ -194,11 +197,16 @@ class WebInterfaceServer:
         if isinstance(content, str):
             conn.send(content)
 
+    def _serverUpdate(self):
+        time.sleep_ms(100)  # Prevent busy waiting
+        try:
+            conn, _ = self.sock.accept()
+        except OSError:
+            return # No connection ready, that's fine  
+
+        self._handle_client(conn)
+
+
     def _server_loop(self):
         while True:
-            try:
-                conn, _ = self.sock.accept()
-            except OSError:
-                continue # No connection ready, that's fine  
-
-            self._handle_client(conn)
+            self._serverUpdate()
