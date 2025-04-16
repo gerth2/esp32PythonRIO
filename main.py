@@ -13,6 +13,8 @@ import network
 codeRunning = False
 rsm = None
 
+MAIN_LOOP_TIME_MS = 50
+
 def startUserCode():
     global rsm, codeRunning
     print("*********** USER ROBOT CODE STARTING ******************")
@@ -71,6 +73,7 @@ try:
 
         webInf.set_batVoltage(HAL.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
+        webInf.update()  # update web interface state
 
         KB.setKeycode(webInf.keyStates)  # update keyboard state
         
@@ -92,8 +95,8 @@ try:
 
         procTimeUs = float(time.ticks_us() - startTimeUs)
         #print(f"Proc Time: {procTimeUs/1000.0}ms")
-        if(procTimeUs < 20*1000.0):
-            time.sleep_us(int(20*1000.0 - procTimeUs))  # 20ms loop time
+        if(procTimeUs < MAIN_LOOP_TIME_MS*1000.0):
+            time.sleep_us(int(MAIN_LOOP_TIME_MS*1000.0 - procTimeUs))  # 20ms loop time
         else:
             print(f"Warning! Loop Overrun: ProcTime: {procTimeUs/1000.0}ms")
 

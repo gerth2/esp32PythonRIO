@@ -1,6 +1,6 @@
 import time
 import _thread
-from _private.wss import send_ws_json, start_ws_server
+from _private.wss import send_ws_json, start_ws_server, ws_server_update
 import usocket as socket
 import uos
 import builtins
@@ -23,13 +23,14 @@ class WebInterfaceServer:
         builtins.print = self._tee_print  # Override print
 
         self._start_server()
-        _thread.start_new_thread(self._server_loop, ())
+        #_thread.start_new_thread(self._server_loop, ())
 
         # Start a websockets server too in the background
-        _thread.start_new_thread(start_ws_server, (8266, self.onWsData, self.onWsDisconnect))
+        start_ws_server()
+        #_thread.start_new_thread(start_ws_server, (8266, self.onWsData, self.onWsDisconnect))
 
         # Periodic data send for websockets
-        _thread.start_new_thread(self.wsSendLoop, ())
+        #_thread.start_new_thread(self.wsSendLoop, ())
 
     def _getStatusMessage(self):
         if self.state == "disabled":
@@ -197,8 +198,13 @@ class WebInterfaceServer:
         if isinstance(content, str):
             conn.send(content)
 
+    def update(self):
+        self._serverUpdate()
+        ws_server_update()
+        self._wsSendPeriodic()
+
+
     def _serverUpdate(self):
-        time.sleep_ms(100)  # Prevent busy waiting
         try:
             conn, _ = self.sock.accept()
         except OSError:
@@ -209,4 +215,5 @@ class WebInterfaceServer:
 
     def _server_loop(self):
         while True:
+            time.sleep_ms(100)  # Prevent busy waiting
             self._serverUpdate()

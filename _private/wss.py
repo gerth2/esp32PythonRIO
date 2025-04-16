@@ -54,7 +54,7 @@ def recv_ws_json(client):
             print("[WSS] JSON decode failed:", str(raw))
             return None
     except OSError as e:
-        if e.errno in [errno.ECONNRESET, errno.EPIPE, errno.ETIMEDOUT]:
+        if e.errno in [errno.ECONNRESET, errno.ETIMEDOUT]:
             print("[WSS] Client disconnected")
             raise  # Re-raise the exception to handle it in the main loop
         return None
@@ -82,38 +82,44 @@ def send_ws_json(obj):
         print("[WSS] Failed to send JSON:", e)
 
 
-def start_ws_server(port=8266, onDataCallback=None, onDisconnectCallback=None):
-    global curWsClient
-    s = socket.socket()
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind(('0.0.0.0', port))
-    s.listen(1)
-    print("[WSS] WebSocket server listening on port", port)
+def ws_server_update(onDataCallback=None, onDisconnectCallback=None):
+    """Handles one iteration of the WebSocket server logic."""
+    global curWsClient, server_socket
 
-    while True:
-        try:
-            client, addr = s.accept()
-            #client.setblocking(False)
-            client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            print("[WSS] Client connected:", addr)
-            websocket_handshake(client)
-
-            while True:
+    try:
+        # Accept a new client if no client is connected
+        if curWsClient is None:
+            server_socket.settimeout(0)  # Non-blocking accept
+            try:
+                client, addr = server_socket.accept()
+                client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                print("[WSS] Client connected:", addr)
+                websocket_handshake(client)
                 curWsClient = client
-                obj = recv_ws_json(client)
-                if obj is not None:
-                    if onDataCallback:
-                        onDataCallback(obj)
-                time.sleep_ms(2)
+            except OSError:
+                pass  # No client connection available, continue
 
-        except Exception as e:
-            print("[WSS] Client error or disconnect:", e)
+        # Handle data from the connected client
+        if curWsClient is not None:
+            try:
+                obj = recv_ws_json(curWsClient)
+                if obj is not None and onDataCallback:
+                    onDataCallback(obj)
+            except OSError as e:
+                print("[WSS] Client error or disconnect:", e)
+                if onDisconnectCallback:
+                    onDisconnectCallback()
+                curWsClient.close()
+                curWsClient = None
 
-        try:
-            curWsClient = None
-            client.close()
-        except:
-            pass
-        print("[WSS] Client disconnected")
-        if onDisconnectCallback:
-            onDisconnectCallback()
+    except Exception as e:
+        print("[WSS] Server error:", e)
+
+def start_ws_server(port=8266, onDataCallback=None, onDisconnectCallback=None):
+    """Initializes the WebSocket server."""
+    global curWsClient, server_socket
+    server_socket = socket.socket()
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('0.0.0.0', port))
+    server_socket.listen(1)
+    print("[WSS] WebSocket server listening on port", port)

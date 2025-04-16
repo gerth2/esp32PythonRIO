@@ -10,6 +10,7 @@ And cuz Chris just wanted to try it.
 
 # TODO
 
+* Attempt removing threads to see if that helps web performance
 * read in joystick data
 * Improve UI clarity on which mode you are in
 * Test wheel rotation sensors
