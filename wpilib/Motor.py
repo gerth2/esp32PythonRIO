@@ -1,19 +1,37 @@
+from _private.HAL import HAL
+
+
 class Motor():
     """
     Common base class for all PWM Motor Controllers.
     """
+
+    VALID_CHANNELS = [0, 1]
+
     def __init__(self, channel) :
         """
         Constructor for a PWM Motor %Controller connected via PWM.
         
         :param channel: The PWM channel that the controller is attached to. 
-                        TBD These on our robot
+                        0 = Left Drive Motor
+                        1 = Right Drive Motor
         """
-        print(f"Memes {channel}")
-        pass
+        if channel not in self.VALID_CHANNELS:
+            raise ValueError(f"Invalid channel. Valid channels are {" , ".join(map(str, self.VALID_CHANNELS))}.")
+        
+        self.ch = channel
+
+        if(self.ch == 0):
+            self.setSpdFcn = HAL.motors.set_left_speed
+            self.setVoltageFcn = HAL.setLeftMotorVoltage
+        else:
+            self.setSpdFcn = HAL.motors.set_right_speed
+            self.setVoltageFcn = HAL.setRightMotorVoltage
+
+        self.invFactor = 1.0
     
     def disable(self) :
-        pass
+        self.setSpdFcn(0.0)
 
 
     def set(self, value) :
@@ -25,10 +43,10 @@ class Motor():
         
         :param value: The speed value between -1.0 and 1.0 to set.
         """
-        pass
+        self.setSpdFcn(_limit(value * self.invFactor))
 
     def setInverted(self, isInverted: bool) :
-        pass
+        self.invFactor = -1.0 if isInverted else 1.0
 
     def setVoltage(self, output) :
         """
@@ -43,7 +61,10 @@ class Motor():
         
         :param output: The voltage to output.
         """
-        pass
+        self.setVoltageFcn(output * self.invFactor)
 
     def stopMotor(self) :
-        pass
+        self.setSpdFcn(0.0)
+
+def _limit(val):
+    return max(min(1.0, val),-1.0)

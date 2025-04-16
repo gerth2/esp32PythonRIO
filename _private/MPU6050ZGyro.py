@@ -25,53 +25,46 @@ class MPU6050ZGyro:
 
     def read_raw_gyro_z(self) :
         """Returns the raw 16-bit signed gyroscope Z value"""
-        data = self.i2c.readfrom_mem(self.MPU6050_ADDR, self.GYRO_ZOUT_H, 2)
-        raw = (data[0] << 8) | data[1]
-        if raw >= 0x8000:
-            raw -= 0x10000
-        return raw
-
-    def read_gyro_z(self) :
-        """Returns Z-axis angular velocity in radians per second (offset not applied)"""
         try:
-            raw = self.read_raw_gyro_z()
-            deg_per_sec = raw / self.GYRO_SENS
-            rad_per_sec = deg_per_sec * (math.pi / 180)
-            return rad_per_sec
+            data = self.i2c.readfrom_mem(self.MPU6050_ADDR, self.GYRO_ZOUT_H, 2)
+            raw = (data[0] << 8) | data[1]
+            if raw >= 0x8000:
+                raw -= 0x10000
+            return raw
         except Exception as e:
             print("MPU6050 read error:", e)
-            return 0.0
+            return 0
+        
+    def read_gyro_z(self) :
+        """Returns Z-axis angular velocity in degrees per second (offset not applied)"""
+        raw = float(self.read_raw_gyro_z())
+        deg_per_sec = raw / float(self.GYRO_SENS)
+        return deg_per_sec - self.offset
 
-    def calibrate(self, num_samples: int = 100, delay_ms: int = 10):
+
+    def calibrate(self, num_samples: int = 50, delay_ms: int = 20):
         """Measures and sets the zero offset for Z-axis angular velocity."""
         total = 0
-        time.sleep_ms(250)
+        time.sleep_ms(1000)
         for _ in range(num_samples):
-            raw = self.read_raw_gyro_z()
-            total += raw
+            total += self.read_gyro_z()
             time.sleep_ms(delay_ms)
 
-        avg_raw = total / num_samples
-        self.offset = avg_raw / self.GYRO_SENS  # in degrees/sec
+        self.offset = total / float(num_samples)
         print("Calibration complete. Offset: {:.3f} deg/s".format(self.offset))
 
     def update(self):
         #s = time.ticks_us()
         """Integrates angular velocity over time to update accumulated angle in degrees."""
-        current_time = time.ticks_us()/1000.0
+        current_time = time.ticks_us()
         dt_ms = time.ticks_diff(current_time, self.last_time)
-        dt = dt_ms / 1000  # seconds
+        dt = dt_ms / 1000000.0  # seconds
 
-        try:
-            raw = self.read_raw_gyro_z()
-            deg_per_sec = raw / self.GYRO_SENS
-            deg_per_sec -= self.offset  # apply calibration offset
+        if(dt < 0):
+            print("ERRROEROEOROE!!")
 
-            self.angle += deg_per_sec * dt
-            self.last_time = current_time
-        except Exception as e:
-            print("MPU6050 update error:", e)
-        #print(f"Gyro Update: {(time.ticks_us() - s)/1000.0}ms")
+        self.angle += self.read_gyro_z() * dt
+        self.last_time = current_time
 
     def get_angle(self) :
         """Returns the current accumulated angle in degrees."""

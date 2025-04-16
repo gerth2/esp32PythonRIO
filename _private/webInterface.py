@@ -116,6 +116,16 @@ class WebInterfaceServer:
             f.write(data)
             self._fileChanged = True
         return True
+    
+    def _reset_robot_file(self):
+        if self.locked:
+            return False
+        with open("robot.py", "w") as fout:
+            with open("robot.py_default", "r") as fin:
+                fout.write(fin.read())
+                self._fileChanged = True
+        return True
+
 
     def _guess_content_type(self, path):
         if path.endswith(".html"): return "text/html"
@@ -137,6 +147,11 @@ class WebInterfaceServer:
                 print(f"[WebEditor] Request: Deploy File")
                 self._write_robot_file(body)
                 self._send_response(conn, "OK")
+
+            elif path.startswith("/resetFile") and method == "POST":
+                print(f"[WebEditor] Request: Reset Robot File")
+                self._reset_robot_file()
+                self._send_response(conn, "OK")        
 
             elif path.startswith("/robot.py"):
                 print(f"[WebEditor] Request: Load File")

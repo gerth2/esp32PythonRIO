@@ -21,7 +21,7 @@ RIGHT_MOTOR_PIN_2 = 25
 
 VMON_PIN = 34
 
-class HardwareAbstractionLayer:
+class _HardwareAbstractionLayer:
     def __init__(self):
         self.i2cBusA = I2C(0, scl=Pin(I2C_BUS_A_SCL), sda=Pin(I2C_BUS_A_SDA), freq=I2C_BUS_A_FREQ)
         self.i2cBusB = I2C(1, scl=Pin(I2C_BUS_B_SCL), sda=Pin(I2C_BUS_B_SDA), freq=I2C_BUS_B_FREQ)
@@ -33,16 +33,10 @@ class HardwareAbstractionLayer:
         self.vMon = VoltageMonitor(pin=VMON_PIN)
         self.vbat = 5.0
 
-        self.heading = 0.0
-
-        self.gyro.calibrate()
         self.gyro.reset()
 
     def update(self):
-        #self.lenc = self.leftEnc.read_position()
-        #self.renc = self.rightEnc.read_position()
         self.gyro.update()
-        self.headingDeg = self.gyro.get_angle()
         self.vbat = self.vMon.read_voltage()
 
     def _voltToMotorCmd(self, volts):
@@ -56,3 +50,6 @@ class HardwareAbstractionLayer:
 
     def setRightMotorVoltage(self, volts):
         self.motors.set_right_speed(self._voltToMotorCmd(volts))
+
+# Singleton instance
+HAL = _HardwareAbstractionLayer()

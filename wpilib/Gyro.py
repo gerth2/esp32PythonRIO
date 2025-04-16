@@ -1,3 +1,5 @@
+from _private.HAL import HAL
+
 class Gyro():
     """
     Use a rate gyro to return the robots heading relative to a starting position.
@@ -30,7 +32,7 @@ class Gyro():
         robot is first turned on while it's sitting at rest before the competition
         starts.
         """
-        pass
+        HAL.gyro.calibrate()
 
     def getAngle(self) :
         """
@@ -45,7 +47,7 @@ class Gyro():
         :returns: The current heading of the robot in degrees. This heading is based
                   on integration of the returned rate from the gyro.
         """
-        pass
+        return HAL.gyro.get_angle()
 
     def getRate(self) :
         """
@@ -55,7 +57,7 @@ class Gyro():
         
         :returns: the current rate in degrees per second
         """
-        pass
+        return HAL.gyro.read_gyro_z()
 
     def reset(self) :
         """
@@ -65,4 +67,4 @@ class Gyro():
         significant drift in the gyro and it needs to be recalibrated after it has
         been running.
         """
-        pass 
+        HAL.gyro.reset() 

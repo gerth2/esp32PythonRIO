@@ -1,9 +1,11 @@
 from TimedRobot import TR_MODE_DISABLED,TR_MODE_AUTONOMOUS, TR_MODE_TELEOP, 
+from _private.Controllers import KB
 from wpilib import *
 import sys, time
-from _private.HAL import HardwareAbstractionLayer
+from _private.HAL import HAL
 from _private.RobotSignalLight import RobotSignalLight
 from _private.webInterface import WebInterfaceServer
+from TimedRobot import MainStateMachine
 from robotName import ROBOT_NAME
 import machine
 import network
@@ -62,42 +64,22 @@ ap.active(True)                       # activate the interface
 try:
     rsl = RobotSignalLight()
     webInf = WebInterfaceServer()
-    hal = HardwareAbstractionLayer()
     startUserCode()
 
     while True:
         startTimeUs = time.ticks_us()
 
-        webInf.set_batVoltage(hal.vMon.read_voltage())
+        webInf.set_batVoltage(HAL.vMon.read_voltage())
         webInf.set_codeRunning(codeRunning)
 
+        KB.setKeycode(webInf.keyStates)  # update keyboard state
         
         if(webInf.state == "disabled"):
             # Motor Safeties - disable
-            hal.setLeftMotorVoltage(0.0)
-            hal.setRightMotorVoltage(0.0)
-            # TODO - other motors
-        else:
-            #########################################
-            # TEMP TESTING ONLY
-            if(webInf.keyStates == 0x01):
-                hal.setLeftMotorVoltage(3.0)
-                hal.setRightMotorVoltage(0.0)
-            elif(webInf.keyStates == 0x04):
-                hal.setLeftMotorVoltage(-3.0)
-                hal.setRightMotorVoltage(0.0)
-            elif(webInf.keyStates == 0x02):
-                hal.setLeftMotorVoltage(0.0)
-                hal.setRightMotorVoltage(3.0)
-            elif(webInf.keyStates == 0x08):
-                hal.setLeftMotorVoltage(0.0)
-                hal.setRightMotorVoltage(-3.0)
-            else:
-                hal.setLeftMotorVoltage(0.0)
-                hal.setRightMotorVoltage(0.0)
-            #########################################   
+            HAL.setLeftMotorVoltage(0.0)
+            HAL.setRightMotorVoltage(0.0)
 
-        hal.update()  # update hardware state
+        HAL.update()  # update hardware state
 
         # Reload robot.py if needed
         if webInf.getFileChanged():

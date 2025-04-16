@@ -11,12 +11,10 @@ And cuz Chris just wanted to try it.
 # TODO
 
 * read in joystick data
-* Design wpilib class replicas
 * Improve UI clarity on which mode you are in
 * Test wheel rotation sensors
 * debug dataplotter
 * Add reset-source-code logic
-* verify periodic timing
 * design PCB
 * write docs
 * Update imaging script to request/assign robot name.

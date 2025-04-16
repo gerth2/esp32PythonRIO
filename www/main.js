@@ -28,9 +28,26 @@ function deploy(){
     })
 }
 
+function resetFile(){
+    fetch('/resetFile', { method: 'POST'})
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to reset robot.py");
+        else {
+            fetchCurrentCode();
+            isChanged = false;
+            updateStatus();
+        }
+        return res.text();
+    })
+}
+
 // Deploy, Download, Upload logic
 document.getElementById('deploy').onclick = () => {
     deploy()
+};
+
+document.getElementById('reset').onclick = () => {
+    resetFile()
 };
 
 //Handle ctrl-s as deploy
@@ -115,7 +132,8 @@ autoBtn.onclick = () => {
 };
 
 // Load robot.py from server on page load
-fetch('/robot.py')
+function fetchCurrentCode(){
+    fetch('/robot.py')
     .then(res => {
         if (!res.ok) throw new Error("Failed to load robot.py");
         return res.text();
@@ -130,6 +148,8 @@ fetch('/robot.py')
         console.error('Error loading robot.py:', err);
         status.textContent = 'Error loading file';
     });
+}
+
 
 function updateDisplayedRobotState(robotName, batVoltage, codeRunning, statusMsg){
     if(isConnected){
@@ -201,5 +221,7 @@ function cleanupAndRetry() {
     setTimeout(connectWebSocket, 500);
 }
 
+// make sure editor is up to date
+fetchCurrentCode();
 // Start connection initially
 connectWebSocket();

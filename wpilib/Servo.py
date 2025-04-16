@@ -1,3 +1,5 @@
+from _private.HAL import HAL
+
 class Servo():
     """
     Standard hobby style servo.
@@ -5,6 +7,10 @@ class Servo():
     The range parameters default to the appropriate values for the Hitec HS-322HD
     servo provided in the FIRST Kit of Parts in 2008.
     """
+
+    VALID_CHANNELS = [0, 1]
+
+
     def __init__(self, channel):
         """
         Constructor.
@@ -12,11 +18,13 @@ class Servo():
         By default, 2.4 ms is used as the max PWM value and 0.6 ms is used as the
         min PWM value.
         
-        :param channel: The PWM channel to which the servo is attached. 0-9 are
-                        on-board, 10-19 are on the MXP port
+        :param channel: The PWM channel to which the servo is attached. 
+                        TBD THESE ON OUR ROBOT
         """
-        pass
-
+        if channel not in self.VALID_CHANNELS:
+            raise ValueError(f"Invalid channel. Valid channels are {" , ".join(map(str, self.VALID_CHANNELS))}.")
+        
+        self.ch = channel
 
     def set(self, value) :
         """

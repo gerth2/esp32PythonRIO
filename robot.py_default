@@ -6,13 +6,13 @@ class MyRobot(TimedRobot):
         pass
 
     def autonomousInit(self):
-        print("myAuto")
+        pass
 
     def autonomousPeriodic(self):
         pass
 
     def teleopInit(self):
-        print("myTeleop")
+        pass
 
     def teleopPeriodic(self):
         pass

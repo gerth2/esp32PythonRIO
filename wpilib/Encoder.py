@@ -1,10 +1,16 @@
-class Encoder(wpilib.interfaces._interfaces.CounterBase, wpiutil._wpiutil.Sendable):
+from _private.HAL import HAL
+
+class Encoder():
+
+    VALID_CHANNELS = [0, 1]
     """
     Class to read onboard encoders.
     """
     def __init__(self, channel:int):
-        # TODO docs - channel is left/right/aux/whatever
-        pass 
+        if channel not in self.VALID_CHANNELS:
+            raise ValueError(f"Invalid channel. Valid channels are {" , ".join(map(str, self.VALID_CHANNELS))}.")
+        
+        self.ch = channel
 
     def get(self) :
         """
@@ -13,10 +19,9 @@ class Encoder(wpilib.interfaces._interfaces.CounterBase, wpiutil._wpiutil.Sendab
         Returns the current count on the Encoder. This method compensates for the
         decoding type.
         
-        :returns: Current count from the Encoder adjusted for the 1x, 2x, or 4x scale
-                  factor.
+        :returns: Current distance traveled by the encoder
         """
-        pass
+        return self.getDistance()
 
     def getDirection(self) -> bool:
         """
@@ -32,7 +37,9 @@ class Encoder(wpilib.interfaces._interfaces.CounterBase, wpiutil._wpiutil.Sendab
         
         :returns: The distance driven since the last reset in rotations
         """
-        pass 
+        #if(self.ch == 0):
+        #    return HAL.lenc.get_position()
+        pass
 
     def getRate(self) :
         """
