@@ -33,7 +33,26 @@ pip install mpremote
 pip install pyserial
 ```
 
-# Deploy
+## Flash Base Firmware
 
-Run `deploy.bat`
+Micropython needs to be installed on the ESP32
 
+Connect to the device with USB
+
+Double-click `base_image/flash.bat`
+
+## Set robot name
+
+Robots need a unique name to differentiate them from others.
+
+Double-click `setRobotName.bat`
+
+# Deploy Robot Application
+
+Double-click `deploy.bat`
+
+# Start Editing Code
+
+Connect to the wifi network named `MINIBOT-<NAME>`
+
+Visit `http://10.17.36.2:8080` in a browser

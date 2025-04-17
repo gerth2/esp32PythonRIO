@@ -1,5 +1,6 @@
 import time
 from _private.HAL import HAL
+from _private.mdns import RobotMDNS
 from _private.wss import send_ws_json, start_ws_server, ws_server_update
 import usocket as socket
 import uos
@@ -7,7 +8,7 @@ import builtins
 from robotName import get_robot_name
 
 class WebInterfaceServer:
-    def __init__(self, port=8080):
+    def __init__(self, port=80):
         self.port = port
         self.locked = False
         self.state = "disabled"
@@ -22,18 +23,14 @@ class WebInterfaceServer:
 
         self._sendPlotData = False
 
+
+
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
 
         self._start_server()
-        #_thread.start_new_thread(self._server_loop, ())
-
-        # Start a websockets server too in the background
         start_ws_server()
-        #_thread.start_new_thread(start_ws_server, (8266, ))
-
-        # Periodic data send for websockets
-        #_thread.start_new_thread(self.wsSendLoop, ())
+        self._mdns = RobotMDNS()
 
     def _getStatusMessage(self):
         if self.state == "disabled":
@@ -87,12 +84,6 @@ class WebInterfaceServer:
         self._wsSendCounter +=1 
         if(self._wsSendCounter >= 100):
             self._wsSendCounter = 0 # wrap every 100 loops
-
-
-    def wsSendLoop(self):
-        while True:
-            self._wsSendPeriodic()
-            time.sleep_ms(300)
 
 
     def onWsDisconnect(self):
@@ -239,6 +230,7 @@ class WebInterfaceServer:
         self._serverUpdate()
         ws_server_update(self.onWsData, self.onWsDisconnect)
         self._wsSendPeriodic()
+        self._mdns.update()
 
 
     def _serverUpdate(self):
@@ -248,9 +240,3 @@ class WebInterfaceServer:
             return # No connection ready, that's fine  
 
         self._handle_client(conn)
-
-
-    def _server_loop(self):
-        while True:
-            time.sleep_ms(100)  # Prevent busy waiting
-            self._serverUpdate()
