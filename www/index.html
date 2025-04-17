@@ -10,6 +10,11 @@
 <body>
 
     <div class="top">
+        <div class="links-toolbar">
+            <a href="docs.html" class="link" target="_blank">Documentation</a>        
+            <a href="plots.html" class="link">Plots</a>
+            <a href="https://robotcasserole.org" class="link" target="_blank">About Robot Casserole</a>
+        </div>
         <div class="editor-toolbar">
             <button id="deploy">Deploy Code</button>
             <button id="reset">Reset Code</button>
@@ -22,6 +27,7 @@
         <div class="editor-with-highlight">
             <div class="highlight-layer" id="highlight"></div>
             <textarea id="editor" spellcheck="false"></textarea>
+            <div class="editor-disabled-overlay"></div>
         </div>
     </div>
 

@@ -1,15 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Time Series Plot</title>
   <style>
-    body { display: flex; font-family: Arial, sans-serif; margin: 0; }
-    #sidebar { width: 200px; padding: 10px; border-right: 1px solid #ccc; background: #f9f9f9; }
-    #plot-container { flex-grow: 1; position: relative; }
-    canvas { width: 100%; height: 100%; display: block; }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      font-family: Arial, sans-serif;
+    }
+
+    #sidebar {
+      width: 200px;
+      padding: 10px;
+      border-right: 1px solid #ccc;
+      background: #f9f9f9;
+      box-sizing: border-box;
+    }
+
+    #plot-container {
+      flex-grow: 1;
+      position: relative;
+      height: 100%;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
   </style>
 </head>
+
 <body>
   <div id="sidebar">
     <h3>Signals</h3>
@@ -19,7 +48,9 @@
     <canvas id="plot"></canvas>
   </div>
 
+
   <script>
+
     let rawData = [];
     let signals = [];
     let selectedSignals = new Set();
@@ -40,8 +71,12 @@
         return;
       }
 
-      const times = rawData.map(d => d.TIME);
-      const selectedData = rawData.map(d => {
+      const now = rawData[rawData.length - 1].TIME;
+      const minTime = now - 15; // Show last 15 seconds
+      const visibleData = rawData.filter(d => d.TIME >= minTime);
+
+      const times = visibleData.map(d => d.TIME);
+      const selectedData = visibleData.map(d => {
         let entry = { TIME: d.TIME };
         selectedSignals.forEach(s => entry[s] = d[s]);
         return entry;
@@ -56,7 +91,7 @@
       const minValue = Math.min(...allValues);
       const maxValue = Math.max(...allValues);
 
-      const margin = 40;
+      const margin = 50;
       const width = canvas.width - 2 * margin;
       const height = canvas.height - 2 * margin;
 
@@ -64,13 +99,45 @@
       ctx.strokeStyle = "#000";
       ctx.strokeRect(margin, margin, width, height);
 
-      const xScale = time => margin + ((time - times[0]) / (times[times.length - 1] - times[0])) * width;
+      const xScale = time => margin + ((time - minTime) / 15) * width;
       const yScale = value => margin + height - ((value - minValue) / (maxValue - minValue)) * height;
 
+      // Axis labels
       ctx.fillStyle = "#000";
+      ctx.textAlign = "center";
       ctx.fillText("Time (s)", canvas.width / 2, canvas.height - 5);
+      ctx.textAlign = "left";
       ctx.fillText(`Y (${minValue.toFixed(2)} - ${maxValue.toFixed(2)})`, 5, margin - 10);
 
+      // Y-axis ticks
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      for (let i = 0; i <= 5; i++) {
+        const yVal = minValue + (i / 5) * (maxValue - minValue);
+        const y = yScale(yVal);
+        ctx.fillText(yVal.toFixed(2), margin - 5, y);
+        ctx.strokeStyle = "#ccc";
+        ctx.beginPath();
+        ctx.moveTo(margin, y);
+        ctx.lineTo(canvas.width - margin, y);
+        ctx.stroke();
+      }
+
+      // X-axis ticks
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      for (let i = 0; i <= 5; i++) {
+        const t = minTime + (i / 5) * 15;
+        const x = xScale(t);
+        ctx.fillText(t.toFixed(1), x, canvas.height - margin + 5);
+        ctx.strokeStyle = "#ccc";
+        ctx.beginPath();
+        ctx.moveTo(x, margin);
+        ctx.lineTo(x, canvas.height - margin);
+        ctx.stroke();
+      }
+
+      // Plot signals
       const colors = ["red", "blue", "green", "orange", "purple", "brown", "magenta", "teal"];
       let colorIndex = 0;
 
@@ -110,44 +177,51 @@
       });
     }
 
-    async function fetchData() {
-      try {
-        const url = `/getData?since=${lastTimeReceived}`;
-        const res = await fetch(url);
-        const newSamples = await res.json();
-        if (!Array.isArray(newSamples) || newSamples.length === 0) return;
+    function handleIncomingData(data) {
+      if (data.TIME <= lastTimeReceived) return;
+      rawData.push(data);
+      lastTimeReceived = data.TIME;
 
-        // Ensure TIME is sorted
-        newSamples.sort((a, b) => a.TIME - b.TIME);
+      // Clean old data
+      const cutoff = data.TIME - 15;
+      rawData = rawData.filter(d => d.TIME >= cutoff);
 
-        // Avoid duplicate timestamps
-        newSamples.forEach(sample => {
-          if (sample.TIME > lastTimeReceived) {
-            rawData.push(sample);
-            lastTimeReceived = sample.TIME;
-          }
-        });
-
-        // Update signals if necessary
-        if (rawData.length > 0) {
-          const latestKeys = Object.keys(rawData[rawData.length - 1]).filter(k => k !== "TIME");
-          if (JSON.stringify(latestKeys.sort()) !== JSON.stringify(signals.sort())) {
-            signals = latestKeys;
-            createCheckboxes();
-          }
-        }
-
-        drawPlot();
-      } catch (err) {
-        console.error("Fetch error:", err);
+      const keys = Object.keys(data).filter(k => k !== "TIME");
+      const sortedKeys = keys.slice().sort();
+      const sortedSignals = signals.slice().sort();
+      if (JSON.stringify(sortedKeys) !== JSON.stringify(sortedSignals)) {
+        signals = keys;
+        createCheckboxes();
       }
+
+      drawPlot();
     }
+
+    const ws = new WebSocket(`ws://${location.hostname}:8266`);
+
+    ws.onopen = () => {
+      console.log("WebSocket connected");
+      ws.send(JSON.stringify({ plotConfig: { enabled: true } }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.plotData) {
+          handleIncomingData(message.plotData);
+        }
+      } catch (e) {
+        console.error("Invalid message:", e);
+      }
+    };
+
+    ws.onclose = () => console.warn("WebSocket closed");
+    ws.onerror = (e) => console.error("WebSocket error", e);
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
-
-    fetchData(); // initial fetch
-    setInterval(fetchData, 2000); // poll every 2s
   </script>
+
 </body>
+
 </html>

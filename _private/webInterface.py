@@ -1,11 +1,10 @@
 import time
-import _thread
+from _private.HAL import HAL
 from _private.wss import send_ws_json, start_ws_server, ws_server_update
 import usocket as socket
 import uos
 import builtins
-import json
-from robotName import ROBOT_NAME
+from robotName import get_robot_name
 
 class WebInterfaceServer:
     def __init__(self, port=8080):
@@ -20,6 +19,8 @@ class WebInterfaceServer:
         self.keyStates = 0x00
 
         self._wsSendCounter = 0
+
+        self._sendPlotData = False
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
@@ -67,11 +68,21 @@ class WebInterfaceServer:
         if(self._wsSendCounter % 50 == 0):
             sendJson = {
                 "robotConfig": {
-                    "robotName": ROBOT_NAME,
+                    "robotName": get_robot_name(),
                 }
             }
 
-        send_ws_json(sendJson)
+        if(self._sendPlotData):
+            sendJson["plotData"] = {
+                "TIME": time.ticks_ms()/1000.0,
+                "batVoltage": self._batVoltage,
+                "codeRunning": self._codeRunning,
+                "gyroAngle": HAL.gyro.get_angle(),
+            }
+
+        if(len(sendJson) > 0):
+            #print(f"[WebInf] Sending JSON {sendJson}")
+            send_ws_json(sendJson)
 
         self._wsSendCounter +=1 
         if(self._wsSendCounter >= 100):
@@ -88,7 +99,8 @@ class WebInterfaceServer:
         # Safety - go to disabled with no input command on client disconnect
         self.state = "disabled"
         self.keyStates = 0x00
-
+        # Utility - stop sending plot data
+        self._sendPlotData = False
 
     def onWsData(self, data):
         # Switchyard for any incoming websocket data from the server
@@ -97,6 +109,11 @@ class WebInterfaceServer:
 
         if "stateCmd" in data:
             self.state = data["stateCmd"]
+
+        if "plotConfig" in data:
+            self._sendPlotData = data["plotConfig"]["enabled"]
+            print("[WebEditor] Plots Enabled: ", self._sendPlotData)
+
 
     def set_batVoltage(self, voltage):
         self._batVoltage = voltage
@@ -175,7 +192,7 @@ class WebInterfaceServer:
             elif path.startswith("/resetFile") and method == "POST":
                 print(f"[WebEditor] Request: Reset Robot File")
                 self._reset_robot_file()
-                self._send_response(conn, "OK")        
+                self._send_response(conn, "OK")
 
             elif path.startswith("/robot.py"):
                 print(f"[WebEditor] Request: Load File")

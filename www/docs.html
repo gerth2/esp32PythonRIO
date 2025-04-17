@@ -1,0 +1,336 @@
+
+    <html>
+    <head>
+        <title>Python Class Documentation</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 2em;
+                background: #f5f5f5;
+            }
+            .file {
+                margin-bottom: 3em;
+            }
+            h1, h2, h3 {
+                font-family: Georgia, serif;
+            }
+            h2 {
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 0.25em;
+            }
+            .class, .function {
+                margin: 3em 0;
+                padding: 1em;
+                background: #ffffff;
+                border-left: 5px solid #007acc;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            details {
+                margin-top: 1em;
+                margin-left: 1em;
+                background: #fafafa;
+                padding: 1em;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+            }
+            .doc {
+                color: #444;
+                font-style: italic;
+                margin-top: 0.5em;
+            }
+            code {
+                font-family: monospace;
+                background: #eee;
+                padding: 0.2em 0.4em;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>MiniBot API Documentation</h1>
+    
+<div class="class"><h2><code>Encoder</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.Encoder</code></div>
+<details><summary>Details</summary>
+<div>Class Variable: <code>VALID_CHANNELS</code></div>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, channel)</code>
+<div><strong>Parameters:</strong><ul>
+<li><code>channel</code>: </li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>get(self)</code>
+<div class="doc">Gets the current count.
+
+Returns the current count on the Encoder. This method compensates for the
+decoding type.
+
+:returns: Current distance traveled by the encoder</div>
+<div><strong>Returns:</strong> Current distance traveled by the encoder</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getDirection(self)</code>
+<div class="doc">The last direction the encoder value changed.
+
+:returns: The last direction the encoder value changed.</div>
+<div><strong>Returns:</strong> The last direction the encoder value changed.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getDistance(self)</code>
+<div class="doc">Get the distance the robot has driven since the last reset.
+
+:returns: The distance driven since the last reset in rotations</div>
+<div><strong>Returns:</strong> The distance driven since the last reset in rotations</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getRate(self)</code>
+<div class="doc">Get the current rate of the encoder in rotations per second
+
+Units are distance per second as scaled by the value from
+SetDistancePerPulse().
+
+:returns: The current rate of the encoder.</div>
+<div><strong>Returns:</strong> The current rate of the encoder.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getStopped(self)</code>
+<div class="doc">Determine if the encoder is stopped.
+
+Using the MaxPeriod value, a boolean is returned that is true if the
+encoder is considered stopped and false if it is still moving. A stopped
+encoder is one where the most recent pulse width exceeds the MaxPeriod.
+
+:returns: True if the encoder is considered stopped.</div>
+<div><strong>Returns:</strong> True if the encoder is considered stopped.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>reset(self)</code>
+<div class="doc">Reset the Encoder distance to zero.
+
+Resets the current count to zero on the encoder.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>setReverseDirection(self, reverseDirection)</code>
+<div class="doc">Set the direction sensing for this encoder.
+
+This sets the direction sensing on the encoder so that it could count in
+the correct software direction regardless of the mounting.
+
+:param reverseDirection: true if the encoder direction should be reversed</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>reverseDirection</code>: true if the encoder direction should be reversed</li>
+</ul></div>
+</div>
+</details></div>
+<div class="class"><h2><code>Gyro</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.Gyro</code></div>
+<div class="doc">Use a rate gyro to return the robots heading relative to a starting position.
+The Gyro class tracks the robots heading based on the starting position. As
+the robot rotates the new heading is computed by integrating the rate of
+rotation returned by the sensor. When the class is instantiated, it does a
+short calibration routine where it samples the gyro while at rest to
+determine the default offset. This is subtracted from each sample to
+determine the heading.
+
+This class is for the gyro sensor onboard the robot</div>
+<details><summary>Details</summary>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self)</code>
+<div class="doc">%Gyro constructor
+
+No arguments, there is only one.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>calibrate(self)</code>
+<div class="doc">Calibrate the gyro by running for a number of samples and computing the
+center value. Then use the center value as the Accumulator center value for
+subsequent measurements.
+
+It&#x27;s important to make sure that the robot is not moving while the
+centering calculations are in progress, this is typically done when the
+robot is first turned on while it&#x27;s sitting at rest before the competition
+starts.</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getAngle(self)</code>
+<div class="doc">Return the actual angle in degrees that the robot is currently facing.
+
+The angle is based on the current accumulator value corrected by the
+oversampling rate, the gyro type and the A/D calibration values. The angle
+is continuous, that is it will continue from 360-&gt;361 degrees. This allows
+algorithms that wouldn&#x27;t want to see a discontinuity in the gyro output as
+it sweeps from 360 to 0 on the second time around.
+
+:returns: The current heading of the robot in degrees. This heading is based
+          on integration of the returned rate from the gyro.</div>
+<div><strong>Returns:</strong> The current heading of the robot in degrees. This heading is based</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>getRate(self)</code>
+<div class="doc">Return the rate of rotation of the gyro
+
+The rate is based on the most recent reading of the gyro analog value
+
+:returns: the current rate in degrees per second</div>
+<div><strong>Returns:</strong> the current rate in degrees per second</div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>reset(self)</code>
+<div class="doc">Reset the gyro.
+
+Resets the gyro to a heading of zero. This can be used if there is
+significant drift in the gyro and it needs to be recalibrated after it has
+been running.</div>
+</div>
+</details></div>
+<div class="class"><h2><code>Keyboard</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.Keyboard</code></div>
+<details><summary>Details</summary>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>w_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>a_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>s_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>d_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>q_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>e_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>z_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>x_pressed(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>c_pressed(self)</code>
+</div>
+</details></div>
+<div class="class"><h2><code>Motor</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.Motor</code></div>
+<div class="doc">Common base class for all PWM Motor Controllers.</div>
+<details><summary>Details</summary>
+<div>Class Variable: <code>VALID_CHANNELS</code></div>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, channel)</code>
+<div class="doc">Constructor for a PWM Motor %Controller connected via PWM.
+
+:param channel: The PWM channel that the controller is attached to. 
+                0 = Left Drive Motor
+                1 = Right Drive Motor</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>channel</code>: The PWM channel that the controller is attached to. </li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>disable(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>set(self, value)</code>
+<div class="doc">Set the PWM value.
+
+The PWM value is set using a range of -1.0 to 1.0, appropriately scaling
+the value for the PWM output on the ESP32.
+
+:param value: The speed value between -1.0 and 1.0 to set.</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>value</code>: The speed value between -1.0 and 1.0 to set.</li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>setInverted(self, isInverted)</code>
+<div><strong>Parameters:</strong><ul>
+<li><code>isInverted</code>: </li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>setVoltage(self, output)</code>
+<div class="doc">Sets the voltage output of the PWMMotorController. Compensates for
+the current bus voltage to ensure that the desired voltage is output even
+if the battery voltage is below 12V - highly useful when the voltage
+outputs are &quot;meaningful&quot; (e.g. they come from a feedforward calculation).
+
+NOTE: This function *must* be called regularly in order for voltage
+compensation to work properly - unlike the ordinary set function, it is not
+&quot;set it and forget it.&quot;
+
+:param output: The voltage to output.</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>output</code>: The voltage to output.</li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>stopMotor(self)</code>
+</div>
+</details></div>
+<div class="class"><h2><code>Servo</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.Servo</code></div>
+<div class="doc">Standard hobby style servo.
+
+The range parameters default to the appropriate values for the Hitec HS-322HD
+servo provided in the FIRST Kit of Parts in 2008.</div>
+<details><summary>Details</summary>
+<div>Class Variable: <code>VALID_CHANNELS</code></div>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, channel)</code>
+<div class="doc">Constructor.
+
+By default, 2.4 ms is used as the max PWM value and 0.6 ms is used as the
+min PWM value.
+
+:param channel: The PWM channel to which the servo is attached. 
+                TBD THESE ON OUR ROBOT</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>channel</code>: The PWM channel to which the servo is attached. </li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>set(self, value)</code>
+<div class="doc">Set the servo position.
+
+Servo values range from 0.0 to 1.0 corresponding to the range of full left
+to full right.
+
+:param value: Position from 0.0 to 1.0.</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>value</code>: Position from 0.0 to 1.0.</li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>setAngle(self, angle)</code>
+<div class="doc">Set the servo angle.
+
+The angles are based on the HS-322HD Servo, and have a range of 0 to 180
+degrees.
+
+Servo angles that are out of the supported range of the servo simply
+&quot;saturate&quot; in that direction. In other words, if the servo has a range of
+(X degrees to Y degrees) than angles of less than X result in an angle of
+X being set and angles of more than Y degrees result in an angle of Y being
+set.
+
+:param angle: The angle in degrees to set the servo.</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>angle</code>: The angle in degrees to set the servo.</li>
+</ul></div>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>setOffline(self)</code>
+<div class="doc">Set the servo to offline.
+
+Set the servo raw value to 0 (undriven)</div>
+</div>
+</details></div>
+</body></html>

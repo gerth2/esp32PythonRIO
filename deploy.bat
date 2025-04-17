@@ -12,6 +12,13 @@ for %%f in (*.py) do (
     )
 )
 
+:: Special default file that needs copied too
+mpremote fs cp robot.py_default :robot.py_default
+if errorlevel 1 (
+    echo Failed to copy robot.py_default
+    exit /b 1
+)
+
 for %%f in (_private/*.py) do (
     mpremote fs cp _private/%%f :_private/%%f
     if errorlevel 1 (

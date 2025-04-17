@@ -6,7 +6,7 @@ from _private.HAL import HAL
 from _private.RobotSignalLight import RobotSignalLight
 from _private.webInterface import WebInterfaceServer
 from TimedRobot import MainStateMachine
-from robotName import ROBOT_NAME
+from robotName import get_robot_name
 import machine
 import network
 
@@ -56,7 +56,7 @@ def updateUserCode():
 # Init WiFi
 ap = network.WLAN(network.WLAN.IF_AP) # create access-point interface
 #ap.config(pm = 0xa11140)  # disables power save mode
-ap.config(ssid=f'ESP-1736-{ROBOT_NAME}')      # set the SSID of the access point
+ap.config(ssid=f'MINIBOT-{get_robot_name()}') # set the SSID of the access point
 ap.config(max_clients=2)              # set how many clients can connect to the network
 ap.ipconfig(addr4=("10.17.36.2", "255.255.255.0")) 
 ap.ipconfig(gw4="10.17.36.1")

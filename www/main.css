@@ -35,6 +35,31 @@ body {
     box-sizing: border-box;
 }
 
+
+.links-toolbar {
+    display: flex;
+    gap: 10px;
+    padding: 5px;
+    background: #eee;
+    align-items: center;
+}
+
+.links-toolbar .link {
+    padding: 0 10px; /* Add spacing around the links */
+    text-decoration: none; /* Optional: Remove underline */
+    color: inherit; /* Keep the text color consistent */
+    border-right: 1px solid #ccc; /* Add a vertical line */
+    transition: color 0.15s ease; /* Smooth transition for color change */
+}
+
+.links-toolbar .link:last-child {
+    border-right: none; /* Remove the line after the last link */
+}
+
+.links-toolbar .link:hover {
+    color: #FC0000; /* Change color to dark red on hover */
+}
+
 .editor-toolbar {
     display: flex;
     gap: 10px;
@@ -80,6 +105,30 @@ body {
     color: transparent;
     caret-color: black;
     resize: none;
+}
+
+/* Overlay for the disabled state */
+.editor-disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(128, 128, 128, 0.5); /* Greyed-out effect */
+    z-index: 3; /* Above the editor */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Prevent interaction */
+}
+
+/* Red Overlay Text styling */
+.editor-disabled-overlay::before {
+    content: ""; /* TODO - better text description needed?*/
+    font-size: 100px;
+    color: rgb(83, 0, 0);
+    font-weight: bold;
+    pointer-events: none;
 }
 
 .highlight-layer {

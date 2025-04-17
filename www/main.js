@@ -16,6 +16,19 @@ let isEnabled = false;
 let currentMode = 'teleop';
 let isConnected = false;
 
+function setEditorDisabled(isDisabled) {
+    const editor = document.getElementById("editor");
+    const overlay = document.querySelector(".editor-disabled-overlay");
+
+    if (isDisabled) {
+        editor.setAttribute("disabled", "true"); // Disable the editor
+        overlay.style.display = "flex"; // Show the overlay
+    } else {
+        editor.removeAttribute("disabled"); // Enable the editor
+        overlay.style.display = "none"; // Hide the overlay
+    }
+}
+
 function deploy(){
     fetch('/deploy', { method: 'POST', body: editor.value })
     .then(res => {
@@ -90,6 +103,12 @@ function updateStatus() {
 // Driver station logic
 function updateEditorLock() {
     editor.disabled = isEnabled;
+    if (!editor.disabled) {
+        setEditorDisabled(false); // Disable overlay
+        editor.focus(); // Focus on the editor
+    } else {
+        setEditorDisabled(true); // Enable overlay
+    }
 }
 
 function sendState() {
@@ -175,7 +194,7 @@ function updateConfig(robotName){
 let ws;
 
 function connectWebSocket() {
-    ws = new WebSocket("ws://10.17.36.2:8266");
+    ws = new WebSocket(`ws://${location.hostname}:8266`);
 
     ws.onopen = function () {
         console.log("Connected to ESP32 WebSocket server");

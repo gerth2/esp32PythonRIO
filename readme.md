@@ -10,16 +10,11 @@ And cuz Chris just wanted to try it.
 
 # TODO
 
-* Attempt removing threads to see if that helps web performance
-* read in joystick data
-* Improve UI clarity on which mode you are in
 * Test wheel rotation sensors
-* debug dataplotter
-* Add reset-source-code logic
 * design PCB
 * write docs
-* Update imaging script to request/assign robot name.
-
+* read in joystick data
+* Integrate plots to main page as flyout
 
 # Docs
 
