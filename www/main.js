@@ -151,22 +151,24 @@ function fetchCurrentCode(){
 }
 
 
-function updateDisplayedRobotState(robotName, batVoltage, codeRunning, statusMsg){
+function updateDisplayedRobotState(batVoltage, codeRunning, statusMsg){
     if(isConnected){
-        statRobotNameEl.innerHTML = robotName;
         statusBatteryEl.innerHTML = batVoltage.toString() + " V";
         statusCommEl.innerHTML = "<span class=\"status-check true\">✔</span></td></tr>"
         statusCodeEl.innerHTML = codeRunning ? "<span class=\"status-check true\">✔</span></td></tr>" : "<span class=\"status-check false\" >✘</span></td></tr>"
         statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
         statusMsgEl.innerHTML = statusMsg;
     } else {
-        statRobotNameEl.innerHTML = " --- ";
         statusBatteryEl.innerHTML = " --- V"
         statusCommEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
         statusCodeEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
         statusJoystickEl.innerHTML = "<span class=\"status-check false\" >✘</span></td></tr>"
         statusMsgEl.innerHTML = "No Robot <br> Communication";
     }
+}
+
+function updateConfig(robotName){
+    statRobotNameEl.innerHTML = robotName;
 }
 
 // global websocket object
@@ -198,7 +200,12 @@ function connectWebSocket() {
 
         if (jsonData.hasOwnProperty("robotState")) {
             let data = jsonData.robotState;
-            updateDisplayedRobotState(data.robotName, data.batVoltage, data.codeRunning, data.statusMsg);
+            updateDisplayedRobotState(data.batVoltage, data.codeRunning, data.statusMsg);
+        }
+
+        if (jsonData.hasOwnProperty("robotConfig")) {
+            let data = jsonData.robotConfig;
+            updateConfig(data.robotName);
         }
     };
 

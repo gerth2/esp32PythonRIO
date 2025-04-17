@@ -19,6 +19,8 @@ class WebInterfaceServer:
         self._codeRunning = False
         self.keyStates = 0x00
 
+        self._wsSendCounter = 0
+
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
 
@@ -27,7 +29,7 @@ class WebInterfaceServer:
 
         # Start a websockets server too in the background
         start_ws_server()
-        #_thread.start_new_thread(start_ws_server, (8266, self.onWsData, self.onWsDisconnect))
+        #_thread.start_new_thread(start_ws_server, (8266, ))
 
         # Periodic data send for websockets
         #_thread.start_new_thread(self.wsSendLoop, ())
@@ -42,21 +44,39 @@ class WebInterfaceServer:
 
 
     def _wsSendPeriodic(self):
-        sendJson = {
-            "robotState": {
-                "robotName": ROBOT_NAME,
-                "batVoltage": self._batVoltage,
-                "codeRunning": self._codeRunning,
-                "keyStates": self.keyStates,
-                "statusMsg": self._getStatusMessage()
-            }
-        }
 
-        if(len(self.console_log) > 0):
-            sendJson["consoleOutput"]  = self.console_log
-            self.console_log = "" #reset
+        sendJson = {}
+
+        # Handle stdout
+        if(self._wsSendCounter % 4 == 0):
+            if(len(self.console_log) > 0):
+                sendJson["consoleOutput"]  = self.console_log
+                self.console_log = "" #reset
+        
+        # Handle periodic state
+        if(self._wsSendCounter % 10 == 0):
+            sendJson = {
+                "robotState": {
+                    "batVoltage": self._batVoltage,
+                    "codeRunning": self._codeRunning,
+                    "statusMsg": self._getStatusMessage()
+                }
+            }
+
+        # Handle configuration - very slow update
+        if(self._wsSendCounter % 50 == 0):
+            sendJson = {
+                "robotConfig": {
+                    "robotName": ROBOT_NAME,
+                }
+            }
 
         send_ws_json(sendJson)
+
+        self._wsSendCounter +=1 
+        if(self._wsSendCounter >= 100):
+            self._wsSendCounter = 0 # wrap every 100 loops
+
 
     def wsSendLoop(self):
         while True:
@@ -200,7 +220,7 @@ class WebInterfaceServer:
 
     def update(self):
         self._serverUpdate()
-        ws_server_update()
+        ws_server_update(self.onWsData, self.onWsDisconnect)
         self._wsSendPeriodic()
 
 

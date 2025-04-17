@@ -33,6 +33,7 @@ def websocket_handshake(client):
 
 def recv_ws_json(client):
     try:
+
         hdr = client.recv(2)
         if not hdr or len(hdr) < 2:
             return None
@@ -49,17 +50,21 @@ def recv_ws_json(client):
             raw[i] ^= mask[i % 4]
 
         try:
-            return json.loads(raw.decode())
+            retVal = json.loads(raw.decode())
+            return retVal
         except ValueError as e:
             print("[WSS] JSON decode failed:", str(raw))
             return None
     except OSError as e:
-        if e.errno in [errno.ECONNRESET, errno.ETIMEDOUT]:
+        if e.errno in [errno.ECONNRESET, errno.ETIMEDOUT, errno.ENOTCONN]:
             print("[WSS] Client disconnected")
             raise  # Re-raise the exception to handle it in the main loop
+        else:
+            pass
         return None
     
 def send_ws_json(obj):
+    global curWsClient
     if(curWsClient is None):
         return # no client, nothin to send
     
@@ -80,6 +85,7 @@ def send_ws_json(obj):
         curWsClient.send(header + payload)
     except Exception as e:
         print("[WSS] Failed to send JSON:", e)
+        curWsClient = None
 
 
 def ws_server_update(onDataCallback=None, onDisconnectCallback=None):
@@ -93,6 +99,7 @@ def ws_server_update(onDataCallback=None, onDisconnectCallback=None):
             try:
                 client, addr = server_socket.accept()
                 client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                client.setblocking(False)  # Make the client socket non-blocking
                 print("[WSS] Client connected:", addr)
                 websocket_handshake(client)
                 curWsClient = client
