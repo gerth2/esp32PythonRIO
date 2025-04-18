@@ -8,7 +8,7 @@ class Servo():
     servo provided in the FIRST Kit of Parts in 2008.
     """
 
-    VALID_CHANNELS = [0, 1]
+    VALID_CHANNELS = [0]
 
 
     def __init__(self, channel):
@@ -24,18 +24,19 @@ class Servo():
         if channel not in self.VALID_CHANNELS:
             raise ValueError(f"Invalid channel. Valid channels are {" , ".join(map(str, self.VALID_CHANNELS))}.")
         
-        self.ch = channel
+        self._ch = channel
 
     def set(self, value) :
         """
         Set the servo position.
         
-        Servo values range from 0.0 to 1.0 corresponding to the range of full left
+        Servo values range from -1.0 to 1.0 corresponding to the range of full left
         to full right.
         
-        :param value: Position from 0.0 to 1.0.
+        :param value: Position from -1.0 to 1.0.
         """
-        pass 
+        if(self._ch == 0) :
+            HAL.servo0.set(value)
 
     def setAngle(self, angle) :
         """
@@ -52,7 +53,7 @@ class Servo():
         
         :param angle: The angle in degrees to set the servo.
         """
-        pass
+        self.set((angle - 90) / 90)  # Convert angle to -1.0 to 1.0 range
 
     def setOffline(self) :
         """
@@ -60,4 +61,5 @@ class Servo():
         
         Set the servo raw value to 0 (undriven)
         """
+        # TODO
         pass
