@@ -6,6 +6,7 @@ import usocket as socket
 import uos
 import builtins
 from robotName import get_robot_name
+#from _private.NT4MiniServer import NT4MiniServer
 
 class WebInterfaceServer:
     def __init__(self, port=80):
@@ -23,7 +24,7 @@ class WebInterfaceServer:
 
         self._sendPlotData = False
 
-
+        #self.nt4mini = NT4MiniServer(port=5810, freq=1.0)  # Initialize NT4 Mini server
 
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
@@ -231,6 +232,7 @@ class WebInterfaceServer:
         ws_server_update(self.onWsData, self.onWsDisconnect)
         self._wsSendPeriodic()
         #self._mdns.update()
+        #self.nt4mini.update()
 
 
     def _serverUpdate(self):
