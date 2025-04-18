@@ -55,4 +55,4 @@ Double-click `deploy.bat`
 
 Connect to the wifi network named `MINIBOT-<NAME>`
 
-Visit `http://10.17.36.2:8080` in a browser
+Visit `http://10.17.36.2` in a browser

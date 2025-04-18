@@ -30,7 +30,7 @@ class WebInterfaceServer:
 
         self._start_server()
         start_ws_server()
-        self._mdns = RobotMDNS()
+        #self._mdns = RobotMDNS()
 
     def _getStatusMessage(self):
         if self.state == "disabled":
@@ -230,7 +230,7 @@ class WebInterfaceServer:
         self._serverUpdate()
         ws_server_update(self.onWsData, self.onWsDisconnect)
         self._wsSendPeriodic()
-        self._mdns.update()
+        #self._mdns.update()
 
 
     def _serverUpdate(self):
