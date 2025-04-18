@@ -66,9 +66,7 @@ baseline for a specified period of time before the filtered value changes.</div>
 <div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, debounce_time, debounce_type)</code>
 <div class="doc">Creates a new Debouncer.
 
-:param debounce_time: The number of seconds the value must change from baseline for the
-                       filtered value to change.
-:param debounce_type: Which type of state change the debouncing will be performed on.</div>
+                       filtered value to change.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>debounce_time</code>: The number of seconds the value must change from baseline for the</li>
 <li><code>debounce_type</code>: Which type of state change the debouncing will be performed on.</li>
@@ -85,10 +83,7 @@ baseline for a specified period of time before the filtered value changes.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>calculate(self, input_val)</code>
-<div class="doc">Applies the debouncer to the input stream.
-
-:param input_val: The current value of the input stream.
-:return: The debounced value of the input stream.</div>
+<div class="doc">Applies the debouncer to the input stream.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>input_val</code>: The current value of the input stream.</li>
 </ul></div>
@@ -96,34 +91,26 @@ baseline for a specified period of time before the filtered value changes.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>set_debounce_time(self, time_seconds)</code>
-<div class="doc">Sets the time to debounce.
-
-:param time_seconds: The debounce time in seconds.</div>
+<div class="doc">Sets the time to debounce.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>time_seconds</code>: The debounce time in seconds.</li>
 </ul></div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>get_debounce_time(self)</code>
-<div class="doc">Gets the time to debounce.
-
-:return: The debounce time in seconds.</div>
+<div class="doc">Gets the time to debounce.</div>
 <div><strong>Returns:</strong> The debounce time in seconds.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>set_debounce_type(self, debounce_type)</code>
-<div class="doc">Sets the debounce type.
-
-:param debounce_type: The debounce type.</div>
+<div class="doc">Sets the debounce type.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>debounce_type</code>: The debounce type.</li>
 </ul></div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>get_debounce_type(self)</code>
-<div class="doc">Gets the debounce type.
-
-:return: The debounce type.</div>
+<div class="doc">Gets the debounce type.</div>
 <div><strong>Returns:</strong> The debounce type.</div>
 </div>
 </details></div>
@@ -142,23 +129,17 @@ baseline for a specified period of time before the filtered value changes.</div>
 <div class="doc">Gets the current count.
 
 Returns the current count on the Encoder. This method compensates for the
-decoding type.
-
-:returns: Current distance traveled by the encoder</div>
+decoding type.</div>
 <div><strong>Returns:</strong> Current distance traveled by the encoder</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getDirection(self)</code>
-<div class="doc">The last direction the encoder value changed.
-
-:returns: The last direction the encoder value changed.</div>
+<div class="doc">The last direction the encoder value changed.</div>
 <div><strong>Returns:</strong> The last direction the encoder value changed.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getDistance(self)</code>
-<div class="doc">Get the distance the robot has driven since the last reset.
-
-:returns: The distance driven since the last reset in rotations</div>
+<div class="doc">Get the distance the robot has driven since the last reset.</div>
 <div><strong>Returns:</strong> The distance driven since the last reset in rotations</div>
 </div>
 <hr>
@@ -166,9 +147,7 @@ decoding type.
 <div class="doc">Get the current rate of the encoder in rotations per second
 
 Units are distance per second as scaled by the value from
-SetDistancePerPulse().
-
-:returns: The current rate of the encoder.</div>
+SetDistancePerPulse().</div>
 <div><strong>Returns:</strong> The current rate of the encoder.</div>
 </div>
 <hr>
@@ -177,9 +156,7 @@ SetDistancePerPulse().
 
 Using the MaxPeriod value, a boolean is returned that is true if the
 encoder is considered stopped and false if it is still moving. A stopped
-encoder is one where the most recent pulse width exceeds the MaxPeriod.
-
-:returns: True if the encoder is considered stopped.</div>
+encoder is one where the most recent pulse width exceeds the MaxPeriod.</div>
 <div><strong>Returns:</strong> True if the encoder is considered stopped.</div>
 </div>
 <hr>
@@ -193,9 +170,7 @@ Resets the current count to zero on the encoder.</div>
 <div class="doc">Set the direction sensing for this encoder.
 
 This sets the direction sensing on the encoder so that it could count in
-the correct software direction regardless of the mounting.
-
-:param reverseDirection: true if the encoder direction should be reversed</div>
+the correct software direction regardless of the mounting.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>reverseDirection</code>: true if the encoder direction should be reversed</li>
 </ul></div>
@@ -240,7 +215,6 @@ is continuous, that is it will continue from 360-&gt;361 degrees. This allows
 algorithms that wouldn&#x27;t want to see a discontinuity in the gyro output as
 it sweeps from 360 to 0 on the second time around.
 
-:returns: The current heading of the robot in degrees. This heading is based
           on integration of the returned rate from the gyro.</div>
 <div><strong>Returns:</strong> The current heading of the robot in degrees. This heading is based</div>
 </div>
@@ -248,9 +222,7 @@ it sweeps from 360 to 0 on the second time around.
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getRate(self)</code>
 <div class="doc">Return the rate of rotation of the gyro
 
-The rate is based on the most recent reading of the gyro analog value
-
-:returns: the current rate in degrees per second</div>
+The rate is based on the most recent reading of the gyro analog value</div>
 <div><strong>Returns:</strong> the current rate in degrees per second</div>
 </div>
 <hr>
@@ -264,36 +236,57 @@ been running.</div>
 </details></div>
 <div class="class"><h2><code>Keyboard</code></h2>
 <div><strong>Import:</strong> <code>import wpilib.Keyboard</code></div>
+<div class="doc">A class to handle keyboard input for the robot.
+It provides methods to check if specific keys are pressed.</div>
 <details><summary>Details</summary>
 <hr>
 <div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self)</code>
+<div class="doc">Initializes the Keyboard class.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>w_pressed(self)</code>
+<div class="doc">Checks if the &#x27;W&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;W&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>a_pressed(self)</code>
+<div class="doc">Checks if the &#x27;A&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;A&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>s_pressed(self)</code>
+<div class="doc">Checks if the &#x27;S&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;S&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>d_pressed(self)</code>
+<div class="doc">Checks if the &#x27;D&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;D&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>q_pressed(self)</code>
+<div class="doc">Checks if the &#x27;Q&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;Q&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>e_pressed(self)</code>
+<div class="doc">Checks if the &#x27;E&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;E&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>z_pressed(self)</code>
+<div class="doc">Checks if the &#x27;Z&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;Z&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>x_pressed(self)</code>
+<div class="doc">Checks if the &#x27;X&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;X&#x27; is pressed, False otherwise.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>c_pressed(self)</code>
+<div class="doc">Checks if the &#x27;C&#x27; key is pressed.</div>
+<div><strong>Returns:</strong> True if &#x27;C&#x27; is pressed, False otherwise.</div>
 </div>
 </details></div>
 <div class="class"><h2><code>MedianFilter</code></h2>
@@ -304,19 +297,14 @@ processing, LIDAR, or ultrasonic sensors).</div>
 <details><summary>Details</summary>
 <hr>
 <div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, size)</code>
-<div class="doc">Creates a new MedianFilter.
-
-:param size: The number of samples in the moving window.</div>
+<div class="doc">Creates a new MedianFilter.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>size</code>: The number of samples in the moving window.</li>
 </ul></div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>calculate(self, next_val)</code>
-<div class="doc">Calculates the moving-window median for the next value of the input stream.
-
-:param next_val: The next input value.
-:return: The median of the moving window, updated to include the next value.</div>
+<div class="doc">Calculates the moving-window median for the next value of the input stream.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>next_val</code>: The next input value.</li>
 </ul></div>
@@ -324,9 +312,7 @@ processing, LIDAR, or ultrasonic sensors).</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>last_value(self)</code>
-<div class="doc">Returns the last value calculated by the MedianFilter.
-
-:return: The last value.</div>
+<div class="doc">Returns the last value calculated by the MedianFilter.</div>
 <div><strong>Returns:</strong> The last value.</div>
 </div>
 <hr>
@@ -343,7 +329,6 @@ processing, LIDAR, or ultrasonic sensors).</div>
 <div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, channel)</code>
 <div class="doc">Constructor for a PWM Motor %Controller connected via PWM.
 
-:param channel: The PWM channel that the controller is attached to. 
                 0 = Left Drive Motor
                 1 = Right Drive Motor</div>
 <div><strong>Parameters:</strong><ul>
@@ -358,9 +343,7 @@ processing, LIDAR, or ultrasonic sensors).</div>
 <div class="doc">Set the PWM value.
 
 The PWM value is set using a range of -1.0 to 1.0, appropriately scaling
-the value for the PWM output on the ESP32.
-
-:param value: The speed value between -1.0 and 1.0 to set.</div>
+the value for the PWM output on the ESP32.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>value</code>: The speed value between -1.0 and 1.0 to set.</li>
 </ul></div>
@@ -380,9 +363,7 @@ outputs are &quot;meaningful&quot; (e.g. they come from a feedforward calculatio
 
 NOTE: This function *must* be called regularly in order for voltage
 compensation to work properly - unlike the ordinary set function, it is not
-&quot;set it and forget it.&quot;
-
-:param output: The voltage to output.</div>
+&quot;set it and forget it.&quot;</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>output</code>: The voltage to output.</li>
 </ul></div>
@@ -406,7 +387,6 @@ servo provided in the FIRST Kit of Parts in 2008.</div>
 By default, 2.4 ms is used as the max PWM value and 0.6 ms is used as the
 min PWM value.
 
-:param channel: The PWM channel to which the servo is attached. 
                 TBD THESE ON OUR ROBOT</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>channel</code>: The PWM channel to which the servo is attached. </li>
@@ -417,9 +397,7 @@ min PWM value.
 <div class="doc">Set the servo position.
 
 Servo values range from 0.0 to 1.0 corresponding to the range of full left
-to full right.
-
-:param value: Position from 0.0 to 1.0.</div>
+to full right.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>value</code>: Position from 0.0 to 1.0.</li>
 </ul></div>
@@ -435,9 +413,7 @@ Servo angles that are out of the supported range of the servo simply
 &quot;saturate&quot; in that direction. In other words, if the servo has a range of
 (X degrees to Y degrees) than angles of less than X result in an angle of
 X being set and angles of more than Y degrees result in an angle of Y being
-set.
-
-:param angle: The angle in degrees to set the servo.</div>
+set.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>angle</code>: The angle in degrees to set the servo.</li>
 </ul></div>
@@ -462,11 +438,8 @@ controlled is a velocity or a voltage.</div>
 <div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, positive_rate_limit, negative_rate_limit, initial_value)</code>
 <div class="doc">Creates a new SlewRateLimiter with the given rate limits and initial value.
 
-:param positive_rate_limit: The rate-of-change limit in the positive direction, in units per second.
                             This is expected to be positive.
-:param negative_rate_limit: The rate-of-change limit in the negative direction, in units per second.
-                            This is expected to be negative. If None, defaults to -positive_rate_limit.
-:param initial_value: The initial value of the input.</div>
+                            This is expected to be negative. If None, defaults to -positive_rate_limit.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>positive_rate_limit</code>: The rate-of-change limit in the positive direction, in units per second.</li>
 <li><code>negative_rate_limit</code>: The rate-of-change limit in the negative direction, in units per second.</li>
@@ -475,10 +448,7 @@ controlled is a velocity or a voltage.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>calculate(self, input_val)</code>
-<div class="doc">Filters the input to limit its slew rate.
-
-:param input_val: The input value whose slew rate is to be limited.
-:return: The filtered value, which will not change faster than the slew rate.</div>
+<div class="doc">Filters the input to limit its slew rate.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>input_val</code>: The input value whose slew rate is to be limited.</li>
 </ul></div>
@@ -486,16 +456,12 @@ controlled is a velocity or a voltage.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>last_value(self)</code>
-<div class="doc">Returns the value last calculated by the SlewRateLimiter.
-
-:return: The last value.</div>
+<div class="doc">Returns the value last calculated by the SlewRateLimiter.</div>
 <div><strong>Returns:</strong> The last value.</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>reset(self, value)</code>
-<div class="doc">Resets the slew rate limiter to the specified value; ignores the rate limit when doing so.
-
-:param value: The value to reset to.</div>
+<div class="doc">Resets the slew rate limiter to the specified value; ignores the rate limit when doing so.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>value</code>: The value to reset to.</li>
 </ul></div>
@@ -506,7 +472,7 @@ controlled is a velocity or a voltage.</div>
 <details><summary>Details</summary>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getFPGATimestamp()</code>
-<div class="doc">Returns the current time in seconds since the FPGA started running.
+<div class="doc">Returns the current time in seconds since the Code started running.
 This is a floating-point number that represents the time in seconds.</div>
 </div>
 </details></div>

@@ -25,10 +25,10 @@ def extract_python_info(filepath, base_package):
             for child in node.body:
                 if isinstance(child, ast.FunctionDef):
                     method_doc = ast.get_docstring(child)
-                    param_docs, return_doc = parse_docstring(method_doc or '')
+                    param_docs, return_doc, cleaned_doc = parse_docstring(method_doc or '')
                     class_info['methods'].append({
                         'name': child.name,
-                        'doc': method_doc,
+                        'doc': cleaned_doc,
                         'param_docs': param_docs,
                         'return_doc': return_doc,
                         'args': [arg.arg for arg in child.args.args]
@@ -52,14 +52,23 @@ def parse_docstring(doc):
     param_docs = {}
     return_doc = None
     lines = doc.splitlines()
+    cleaned_lines = []
+
     for line in lines:
         param_match = re.match(r"\s*:param (\w+):\s*(.*)", line)
         if param_match:
             param_docs[param_match.group(1)] = param_match.group(2)
+            continue  # skip adding to cleaned_lines
+
         return_match = re.match(r"\s*:returns?:\s*(.*)", line)
         if return_match:
             return_doc = return_match.group(1)
-    return param_docs, return_doc
+            continue  # skip adding to cleaned_lines
+
+        cleaned_lines.append(line)
+
+    cleaned_doc = "\n".join(cleaned_lines).strip()
+    return param_docs, return_doc, cleaned_doc
 
 # Find all .py files in folder
 def find_python_files(folder):
