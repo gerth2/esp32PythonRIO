@@ -1,11 +1,8 @@
 import time
-from enum import Enum
 
-class DebounceType(Enum):
-    """Type of debouncing to perform."""
-    RISING = 1
-    FALLING = 2
-    BOTH = 3
+RISING = 1
+FALLING = 2
+BOTH = 3
 
 class Debouncer:
     """
@@ -13,7 +10,7 @@ class Debouncer:
     baseline for a specified period of time before the filtered value changes.
     """
 
-    def __init__(self, debounce_time: float, debounce_type: DebounceType = DebounceType.RISING):
+    def __init__(self, debounce_time: float, debounce_type= RISING):
         """
         Creates a new Debouncer.
 
@@ -25,7 +22,7 @@ class Debouncer:
         self._debounce_type = debounce_type
         self._prev_time = self._get_time()
 
-        if debounce_type in (DebounceType.BOTH, DebounceType.RISING):
+        if debounce_type in (BOTH, RISING):
             self._baseline = False
         else:  # DebounceType.FALLING
             self._baseline = True
@@ -50,7 +47,7 @@ class Debouncer:
             self._reset_timer()
 
         if self._has_elapsed():
-            if self._debounce_type == DebounceType.BOTH:
+            if self._debounce_type == BOTH:
                 self._baseline = input_val
                 self._reset_timer()
             return input_val
@@ -73,7 +70,7 @@ class Debouncer:
         """
         return self._debounce_time
 
-    def set_debounce_type(self, debounce_type: DebounceType):
+    def set_debounce_type(self, debounce_type):
         """
         Sets the debounce type.
 
@@ -81,7 +78,7 @@ class Debouncer:
         """
         self._debounce_type = debounce_type
 
-    def get_debounce_type(self) -> DebounceType:
+    def get_debounce_type(self):
         """
         Gets the debounce type.
 

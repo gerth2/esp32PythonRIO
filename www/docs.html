@@ -49,14 +49,6 @@
     <body>
         <h1>MiniBot API Documentation</h1>
     
-<div class="class"><h2><code>DebounceType</code></h2>
-<div><strong>Import:</strong> <code>import wpilib.DebounceType</code></div>
-<div class="doc">Type of debouncing to perform.</div>
-<details><summary>Details</summary>
-<div>Class Variable: <code>RISING</code></div>
-<div>Class Variable: <code>FALLING</code></div>
-<div>Class Variable: <code>BOTH</code></div>
-</details></div>
 <div class="class"><h2><code>Debouncer</code></h2>
 <div><strong>Import:</strong> <code>import wpilib.Debouncer</code></div>
 <div class="doc">A simple debounce filter for boolean streams. Requires that the boolean change value from
@@ -287,37 +279,6 @@ It provides methods to check if specific keys are pressed.</div>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>c_pressed(self)</code>
 <div class="doc">Checks if the &#x27;C&#x27; key is pressed.</div>
 <div><strong>Returns:</strong> True if &#x27;C&#x27; is pressed, False otherwise.</div>
-</div>
-</details></div>
-<div class="class"><h2><code>MedianFilter</code></h2>
-<div><strong>Import:</strong> <code>import wpilib.MedianFilter</code></div>
-<div class="doc">A class that implements a moving-window median filter. Useful for reducing measurement noise,
-especially with processes that generate occasional, extreme outliers (such as values from vision
-processing, LIDAR, or ultrasonic sensors).</div>
-<details><summary>Details</summary>
-<hr>
-<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self, size)</code>
-<div class="doc">Creates a new MedianFilter.</div>
-<div><strong>Parameters:</strong><ul>
-<li><code>size</code>: The number of samples in the moving window.</li>
-</ul></div>
-</div>
-<hr>
-<div style="margin-top: 1em;"><strong>Method:</strong> <code>calculate(self, next_val)</code>
-<div class="doc">Calculates the moving-window median for the next value of the input stream.</div>
-<div><strong>Parameters:</strong><ul>
-<li><code>next_val</code>: The next input value.</li>
-</ul></div>
-<div><strong>Returns:</strong> The median of the moving window, updated to include the next value.</div>
-</div>
-<hr>
-<div style="margin-top: 1em;"><strong>Method:</strong> <code>last_value(self)</code>
-<div class="doc">Returns the last value calculated by the MedianFilter.</div>
-<div><strong>Returns:</strong> The last value.</div>
-</div>
-<hr>
-<div style="margin-top: 1em;"><strong>Method:</strong> <code>reset(self)</code>
-<div class="doc">Resets the filter, clearing the window of all elements.</div>
 </div>
 </details></div>
 <div class="class"><h2><code>Motor</code></h2>
