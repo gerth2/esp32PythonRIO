@@ -79,12 +79,10 @@ try:
         webInf.update()  # update web interface state
 
         KB.setKeycode(webInf.keyStates)  # update keyboard state
-        
-        if(webInf.state == "disabled"):
-            # Motor Safeties - disable
-            HAL.setLeftMotorVoltage(0.0)
-            HAL.setRightMotorVoltage(0.0)
 
+        # Motor Safeties - disable
+        HAL.setStopped(webInf.state == "disabled")
+        
         HAL.update()  # update hardware state
 
         # Reload robot.py if needed

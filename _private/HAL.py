@@ -58,5 +58,9 @@ class _HardwareAbstractionLayer:
     def setRightMotorVoltage(self, volts):
         self.motors.set_right_speed(self._voltToMotorCmd(volts))
 
+    def setStopped(self, isStopped):
+        self.motors.setStopped(isStopped)
+        self.servo0.setStopped(isStopped)
+
 # Singleton instance
 HAL = _HardwareAbstractionLayer()

@@ -70,4 +70,4 @@ class MPU6050ZGyro:
     def reset(self):
         """Resets the integrated angle to zero."""
         self.angle = 0.0
-        self.last_time = time.ticks_us()/1000.0
+        self.last_time = time.ticks_us()

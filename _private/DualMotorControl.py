@@ -14,6 +14,8 @@ class DualMotorDriver:
         self.right_pwm1 = PWM(Pin(right_pin1), freq=freq)
         self.right_pwm2 = PWM(Pin(right_pin2), freq=freq)
 
+        self.isStopped = True
+
         self.set_left_speed(0)
         self.set_right_speed(0)
 
@@ -25,15 +27,19 @@ class DualMotorDriver:
         speed = max(min(speed, 1.0), -1.0)
         duty = int(abs(speed) * 1023)  # 10-bit resolution
 
-        if speed > 0:
-            pwm1.duty(duty)
-            pwm2.duty(0)
-        elif speed < 0:
+        if(self.isStopped ):
             pwm1.duty(0)
-            pwm2.duty(duty)
+            pwm2.duty(0)
         else:
-            pwm1.duty(0)
-            pwm2.duty(0)
+            if speed > 0:
+                pwm1.duty(duty)
+                pwm2.duty(0)
+            elif speed < 0:
+                pwm1.duty(0)
+                pwm2.duty(duty)
+            else:
+                pwm1.duty(0)
+                pwm2.duty(0)
 
     def set_left_speed(self, speed: float):
         """Set speed for left motor (-1.0 to 1.0)."""
@@ -44,7 +50,6 @@ class DualMotorDriver:
         """Set speed for right motor (-1.0 to 1.0)."""
         self._set_motor(self.right_pwm1, self.right_pwm2, speed)
 
-    def stop(self):
+    def setStopped(self, stopped):
         """Stops both motors."""
-        self.set_left_speed(0)
-        self.set_right_speed(0)
+        self.isStopped = stopped

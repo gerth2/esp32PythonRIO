@@ -23,15 +23,16 @@ class MyRobot(TimedRobot):
 
     def autonomousInit(self):
         print("myAuto")
-        self.gyro.reset()
 
     def autonomousPeriodic(self):
-        print(self.gyro.getAngle())
-
+        pass
+        
     def teleopInit(self):
         print("myTeleop")
         self.lenc.reset()
         self.renc.reset()
+        self.gyro.reset()
+
 
     def teleopPeriodic(self):      
         self.fwdRevCmd = 0.0
@@ -52,6 +53,11 @@ class MyRobot(TimedRobot):
             self.servo.setAngle(-90)
         elif(self.kb.e_pressed()):
             self.servo.setAngle(90)
+            
+        gyroAngle = self.gyro.getAngle()
+        self.rotCmd += (0.0 - gyroAngle)* 0.02
+
+        SmartDashboard.putNumber("GyroAngle", gyroAngle)
 
 
 
@@ -61,8 +67,8 @@ class MyRobot(TimedRobot):
         rightMotorCmd = self.fwdRevCmd + self.rotCmd
         self.rightMotor.set(rightMotorCmd)
 
-        SmartDashboard.putNumber("Left Encoder", self.lenc.get())
-        SmartDashboard.putNumber("Right Encoder", self.renc.get())
+        SmartDashboard.putNumber("Left Encoder", self.lenc.getRate())
+        SmartDashboard.putNumber("Right Encoder", self.renc.getRate())
         SmartDashboard.putNumber("Left Motor Cmd", leftMotorCmd)
         SmartDashboard.putNumber("Right Motor Cmd", rightMotorCmd)
         
