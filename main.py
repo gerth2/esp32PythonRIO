@@ -4,7 +4,7 @@ from wpilib import *
 import sys, time
 from _private.HAL import HAL
 from _private.RobotSignalLight import RobotSignalLight
-from _private.webInterface import WebInterfaceServer
+from _private.webInterface import WS
 from TimedRobot import MainStateMachine
 from robotName import get_robot_name
 import machine
@@ -64,8 +64,11 @@ ap.active(True)                       # activate the interface
 
 
 try:
+    webInf = WS
+    webInf.start()  # start the web server
+
     rsl = RobotSignalLight()
-    webInf = WebInterfaceServer()
+
     startUserCode()
 
     while True:

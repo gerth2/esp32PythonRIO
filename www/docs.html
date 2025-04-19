@@ -127,7 +127,7 @@ decoding type.</div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getDirection(self)</code>
 <div class="doc">The last direction the encoder value changed.</div>
-<div><strong>Returns:</strong> The last direction the encoder value changed.</div>
+<div><strong>Returns:</strong> The last direction the encoder value. True = Forward, False = Reverse</div>
 </div>
 <hr>
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>getDistance(self)</code>
@@ -357,10 +357,10 @@ min PWM value.
 <div style="margin-top: 1em;"><strong>Method:</strong> <code>set(self, value)</code>
 <div class="doc">Set the servo position.
 
-Servo values range from 0.0 to 1.0 corresponding to the range of full left
+Servo values range from -1.0 to 1.0 corresponding to the range of full left
 to full right.</div>
 <div><strong>Parameters:</strong><ul>
-<li><code>value</code>: Position from 0.0 to 1.0.</li>
+<li><code>value</code>: Position from -1.0 to 1.0.</li>
 </ul></div>
 </div>
 <hr>
@@ -425,6 +425,25 @@ controlled is a velocity or a voltage.</div>
 <div class="doc">Resets the slew rate limiter to the specified value; ignores the rate limit when doing so.</div>
 <div><strong>Parameters:</strong><ul>
 <li><code>value</code>: The value to reset to.</li>
+</ul></div>
+</div>
+</details></div>
+<div class="class"><h2><code>SmartDashboard</code></h2>
+<div><strong>Import:</strong> <code>import wpilib.SmartDashboard</code></div>
+<div class="doc">Puts numbers to plots on a dashboard</div>
+<details><summary>Details</summary>
+<hr>
+<div style="margin-top: 1em;"><strong>Constructor:</strong> <code>__init__(self)</code>
+</div>
+<hr>
+<div style="margin-top: 1em;"><strong>Method:</strong> <code>putNumber(keyName, value)</code>
+<div class="doc">Maps the specified key to the specified value in this table.
+
+The value can be retrieved by calling the get method with a key that is
+equal to the original key.</div>
+<div><strong>Parameters:</strong><ul>
+<li><code>keyName</code>: the key</li>
+<li><code>value</code>: the value</li>
 </ul></div>
 </div>
 </details></div>

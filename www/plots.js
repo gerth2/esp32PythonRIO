@@ -9,7 +9,7 @@ const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+  canvas.height = canvas.clientHeight*0.9;
   drawPlot();
 }
 

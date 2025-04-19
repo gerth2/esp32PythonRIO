@@ -6,6 +6,7 @@ from .Keyboard import Keyboard
 from .SlewRateLimiter import SlewRateLimiter
 from .Debouncer import Debouncer
 from .Timer import Timer
+from .SmartDashboard import SmartDashboard
 
 __all__ = [
     'Servo', 
@@ -16,4 +17,5 @@ __all__ = [
     'SlewRateLimiter', 
     'Debouncer', 
     'Timer',
+    'SmartDashboard',
 ]

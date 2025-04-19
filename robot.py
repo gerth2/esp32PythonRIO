@@ -1,5 +1,5 @@
 from TimedRobot import TimedRobot
-from wpilib import Gyro, Motor, Keyboard, Servo, Encoder
+from wpilib import Gyro, Motor, Keyboard, Servo, Encoder, SmartDashboard
 
 class MyRobot(TimedRobot):
     def __init__(self):
@@ -53,10 +53,16 @@ class MyRobot(TimedRobot):
         elif(self.kb.e_pressed()):
             self.servo.setAngle(90)
 
-        print(f"Left: {self.lenc.get()}, Right: {self.renc.get()}")
 
 
     def robotPeriodic(self):
-        self.leftMotor.set(self.fwdRevCmd - self.rotCmd)
-        self.rightMotor.set(self.fwdRevCmd + self.rotCmd)
+        leftMotorCmd = self.fwdRevCmd - self.rotCmd
+        self.leftMotor.set(leftMotorCmd)
+        rightMotorCmd = self.fwdRevCmd + self.rotCmd
+        self.rightMotor.set(rightMotorCmd)
+
+        SmartDashboard.putNumber("Left Encoder", self.lenc.get())
+        SmartDashboard.putNumber("Right Encoder", self.renc.get())
+        SmartDashboard.putNumber("Left Motor Cmd", leftMotorCmd)
+        SmartDashboard.putNumber("Right Motor Cmd", rightMotorCmd)
         

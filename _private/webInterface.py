@@ -6,9 +6,8 @@ import usocket as socket
 import uos
 import builtins
 from robotName import get_robot_name
-#from _private.NT4MiniServer import NT4MiniServer
 
-class WebInterfaceServer:
+class _WebInterfaceServer:
     def __init__(self, port=80):
         self.port = port
         self.locked = False
@@ -23,9 +22,10 @@ class WebInterfaceServer:
         self._wsSendCounter = 0
 
         self._sendPlotData = False
+        self._plotSignalDict = {}
 
-        #self.nt4mini = NT4MiniServer(port=5810, freq=1.0)  # Initialize NT4 Mini server
 
+    def start(self):
         self._orig_print = builtins.print
         builtins.print = self._tee_print  # Override print
 
@@ -71,12 +71,13 @@ class WebInterfaceServer:
             }
 
         if(self._sendPlotData):
-            sendJson["plotData"] = {
-                "TIME": time.ticks_ms()/1000.0,
-                "batVoltage": self._batVoltage,
-                "codeRunning": self._codeRunning,
-                "gyroAngle": HAL.gyro.get_angle(),
-            }
+            self._plotSignalDict["TIME"] = time.ticks_ms()/1000.0
+            self._plotSignalDict["Battery Voltage"] = self._batVoltage
+            self._plotSignalDict["Code Running"] = 1.0 if self._codeRunning else 0.0
+            self._plotSignalDict["Enabled"] = 1.0 if self.state != "disabled" else 0.0
+            self._plotSignalDict["Autonomous"] = 1.0 if self.state == "auto" else 0.0
+            self._plotSignalDict["Teleop"] = 1.0 if self.state == "teleop" else 0.0
+            sendJson["plotData"] = self._plotSignalDict
 
         if(len(sendJson) > 0):
             #print(f"[WebInf] Sending JSON {sendJson}")
@@ -86,6 +87,8 @@ class WebInterfaceServer:
         if(self._wsSendCounter >= 100):
             self._wsSendCounter = 0 # wrap every 100 loops
 
+    def plotsPutNumber(self, sigName, value):
+        self._plotSignalDict[sigName] = value
 
     def onWsDisconnect(self):
         # Safety - go to disabled with no input command on client disconnect
@@ -242,3 +245,6 @@ class WebInterfaceServer:
             return # No connection ready, that's fine  
 
         self._handle_client(conn)
+
+# Singleton instance
+WS = _WebInterfaceServer()
