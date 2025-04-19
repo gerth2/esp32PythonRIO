@@ -226,6 +226,10 @@ function connectWebSocket() {
             let data = jsonData.robotConfig;
             updateConfig(data.robotName);
         }
+
+        if (jsonData.hasOwnProperty("plotData")) {
+            handleNewPlotData(jsonData.plotData);
+        }
     };
 
     ws.onerror = function (error) {
@@ -246,6 +250,38 @@ function cleanupAndRetry() {
     // Wait 0.5 seconds and then reconnect
     setTimeout(connectWebSocket, 500);
 }
+
+let flyoutOpen = false;
+
+function toggleFlyout() {
+    const panel = document.getElementById('flyout-panel');
+    const tab = document.getElementById('flyout-tab');
+
+    if (flyoutOpen) {
+        panel.classList.remove('open');
+        tab.innerText = '🗠 ▶';
+        onFlyoutRetract();
+    } else {
+        panel.classList.add('open');
+        tab.innerText = '🗠 ◀';
+        onFlyoutExtend();
+    }
+
+    flyoutOpen = !flyoutOpen;
+}
+
+function onFlyoutExtend() {
+    console.log("Plots Flyout extended");
+    ws.send(JSON.stringify({ plotConfig: { enabled: true } }));
+
+}
+
+function onFlyoutRetract() {
+    console.log("Plots Flyout retracted");
+    ws.send(JSON.stringify({ plotConfig: { enabled: false } }));
+
+}
+
 
 // make sure editor is up to date
 fetchCurrentCode();

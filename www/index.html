@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Robot Code Editor</title>
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="plots.css">
 </head>
 
 <body>
@@ -12,7 +13,6 @@
     <div class="top">
         <div class="links-toolbar">
             <a href="docs.html" class="link" target="_blank">Documentation</a>        
-            <a href="plots.html" class="link">Plots</a>
             <a href="https://robotcasserole.org" class="link" target="_blank">About Robot Casserole</a>
         </div>
         <div class="editor-toolbar">
@@ -21,7 +21,7 @@
             <button id="download">Download to PC</button>
             <input type="file" id="upload" style="display:none" />
             <button onclick="document.getElementById('upload').click()">Upload From PC</button>
-            <span id="status" class="editor-status">Unchanged</span>
+            <span id="status" class="editor-status">Not Loaded Yet...</span>
         </div>
     
         <div class="editor-with-highlight">
@@ -55,9 +55,24 @@
         <div id="console" class="ds-right"></div>
     </div>
 
+    <div id="flyout-tab" onclick="toggleFlyout()">🗠 ▶</div>
+
+    <div id="flyout-panel">
+        <div id="flyout-content">
+            <div id="sidebar">
+              <h3>Signals</h3>
+                <div id="signal-list"></div>
+              </div>
+              <div id="plot-container">
+                <canvas id="plot"></canvas>
+              </div>            
+        </div>
+    </div>
+
+    <script src="plots.js" ></script>
     <script src="main.js"></script>
     <script src="editor.js"></script>
-    <script src="controls.js"></script>
+    <script src="controls.js" ></script>
 
 </body>
 

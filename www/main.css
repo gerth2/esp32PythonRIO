@@ -313,3 +313,46 @@ body {
 .status-check.false {
     color: red;
 }
+
+#flyout-panel {
+    position: fixed;
+    top: 20%;
+    right: -50vw; /* hidden by default */
+    width: 50vw;
+    height: 60%;
+    background-color: #f0f0f0;
+    border-left: 2px solid #ccc;
+    box-shadow: -3px 0 5px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    padding: 10px;
+}
+
+#flyout-panel.open {
+    right: 0;
+}
+
+#flyout-tab {
+    position: fixed;
+    top: 40%;
+    right: 0;
+    width: 40px;
+    height: 100px;
+    background-color: #2b2b2b;
+    color: white;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-align: center;
+    font-weight: bold;
+    z-index: 1001;
+    user-select: none;
+    font-size: 30px;
+}
+
+#flyout-content {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    font-family: Arial, sans-serif;
+}
