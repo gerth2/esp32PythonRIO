@@ -1,17 +1,25 @@
 from TimedRobot import TimedRobot
-from wpilib import Gyro, Motor, Keyboard
+from wpilib import Gyro, Motor, Keyboard, Servo, Encoder
 
 class MyRobot(TimedRobot):
     def __init__(self):
         self.gyro = Gyro() 
         self.gyro.calibrate()
+        
         self.leftMotor = Motor(0)
         self.rightMotor = Motor(1)
         self.rightMotor.setInverted(True)
+        
         self.kb = Keyboard()
         
         self.fwdRevCmd = 0.0
         self.rotCmd = 0.0
+
+        self.lenc = Encoder(0)
+        self.renc = Encoder(1)
+        self.lenc.setReverseDirection(True)
+
+        self.servo = Servo(0)
 
     def autonomousInit(self):
         print("myAuto")
@@ -22,6 +30,8 @@ class MyRobot(TimedRobot):
 
     def teleopInit(self):
         print("myTeleop")
+        self.lenc.reset()
+        self.renc.reset()
 
     def teleopPeriodic(self):      
         self.fwdRevCmd = 0.0
@@ -36,6 +46,15 @@ class MyRobot(TimedRobot):
             self.rotCmd = 1.0
         elif(self.kb.d_pressed()):
             self.rotCmd = -1.0
+
+
+        if(self.kb.q_pressed()):
+            self.servo.setAngle(-90)
+        elif(self.kb.e_pressed()):
+            self.servo.setAngle(90)
+
+        print(f"Left: {self.lenc.get()}, Right: {self.renc.get()}")
+
 
     def robotPeriodic(self):
         self.leftMotor.set(self.fwdRevCmd - self.rotCmd)

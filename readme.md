@@ -10,11 +10,10 @@ And cuz Chris just wanted to try it.
 
 # TODO
 
-* Test wheel rotation sensors
 * design PCB
 * write docs
 * read in joystick data
-* Integrate plots to main page as flyout
+* Integrate plots to main page as flyout, or NT4
 
 # Docs
 

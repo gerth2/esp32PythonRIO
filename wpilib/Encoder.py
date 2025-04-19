@@ -11,6 +11,7 @@ class Encoder():
             raise ValueError(f"Invalid channel. Valid channels are {" , ".join(map(str, self.VALID_CHANNELS))}.")
         
         self.ch = channel
+        self.invMult = 1.0
 
     def get(self) :
         """
@@ -27,9 +28,9 @@ class Encoder():
         """
         The last direction the encoder value changed.
         
-        :returns: The last direction the encoder value changed.
+        :returns: The last direction the encoder value. True = Forward, False = Reverse
         """
-        pass
+        return self.getRate() > 0.0
 
     def getDistance(self) :
         """
@@ -37,9 +38,11 @@ class Encoder():
         
         :returns: The distance driven since the last reset in rotations
         """
-        #if(self.ch == 0):
-        #    return HAL.lenc.get_position()
-        pass
+        if(self.ch == 0):
+            return HAL.leftEnc.get_position() * self.invMult
+        elif(self.ch == 1):
+            return HAL.rightEnc.get_position() * self.invMult
+        
 
     def getRate(self) :
         """
@@ -50,8 +53,11 @@ class Encoder():
         
         :returns: The current rate of the encoder.
         """
-        pass
-
+        if(self.ch == 0):
+            return HAL.leftEnc.get_velocity() * self.invMult
+        elif(self.ch == 1):
+            return HAL.rightEnc.get_velocity()* self.invMult
+        
     def getStopped(self) -> bool:
         """
         Determine if the encoder is stopped.
@@ -62,7 +68,7 @@ class Encoder():
         
         :returns: True if the encoder is considered stopped.
         """
-        pass
+        return self.getRate() == 0.0
 
     def reset(self) :
         """
@@ -70,8 +76,11 @@ class Encoder():
         
         Resets the current count to zero on the encoder.
         """
-        pass
-
+        if(self.ch == 0):
+            HAL.leftEnc.reset()
+        elif(self.ch == 1):
+            HAL.rightEnc.reset()
+        
     def setReverseDirection(self, reverseDirection: bool) :
         """
         Set the direction sensing for this encoder.
@@ -81,5 +90,5 @@ class Encoder():
         
         :param reverseDirection: true if the encoder direction should be reversed
         """
-        pass
+        self.invMult = -1.0 if reverseDirection else 1.0
    
