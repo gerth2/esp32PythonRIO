@@ -10,12 +10,26 @@ And cuz Chris just wanted to try it.
 
 # TODO
 
-* design PCB
-* write docs
+* More docs
+* Encoders to read in inches
+* Reprint base with better clearance on gyro and correct spacing for casters
 * read in joystick data
-* Integrate plots to main page as flyout, or NT4
 
 # Docs
+
+## CAD
+
+[Click here for CAD Files](https://cad.onshape.com/documents/cd5cf30fb9d9eab65abede32/w/24f1515a5d1d0a144995229d/e/b4184583bcb8092ed9809ad6?renderMode=0&uiState=6809be124b29024d99744ee3)
+
+## BOM
+
+[Click here for the bill of materials](https://docs.google.com/spreadsheets/d/1lDysrsZ1GDr1_VVy0CvlosRq3Vz6ztyXz19SSadELxg/edit?usp=sharing)
+
+## PCB
+
+[Click here for the PCB and schematic source](https://oshwlab.com/chrisgerth010592/minibot)
+
+## Software Resources
 
 * https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads - usb driver needed for boards
 * https://docs.espressif.com/projects/esptool/en/latest/esp32/ - esptool for uploading basic firmware
